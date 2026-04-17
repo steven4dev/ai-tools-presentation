@@ -330,6 +330,11 @@
       border-color: var(--layer-c, var(--gold));
       color: var(--layer-c, var(--gold));
     }
+    .demo-badge.has-demo {
+      border-color: var(--gold);
+      color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(244,185,66,.35), 0 0 8px rgba(244,185,66,.25);
+    }
 
     .sc-body {
       max-height: 0; overflow: hidden;
@@ -537,6 +542,20 @@
     .map-row.ml4 .map-cnt { background: rgba(0,121,107,.14);  color: var(--l4); }
     .map-row.ml5 .map-cnt { background: rgba(46,125,50,.14);  color: var(--l5); }
     .map-arrow { color: var(--dim); font-size: 0.85rem; }
+    .layer-motto { cursor: default; text-decoration: underline dotted rgba(255,255,255,.3); }
+    #motto-tip {
+      position: fixed; z-index: 900; pointer-events: none;
+      border-radius: 10px; overflow: hidden;
+      box-shadow: 0 6px 32px rgba(0,0,0,.7);
+      border: 1px solid rgba(255,255,255,.15);
+      max-height: 90vh; overflow-y: auto; opacity: 0;
+      transition: opacity 180ms;
+    }
+    #motto-tip.vis { opacity: 1; }
+    #motto-tip.landscape { width: 800px; height: auto; }
+    #motto-tip.portrait  { width: auto; height: 800px; }
+    #motto-tip img { display: block; width: 100%; height: auto; }
+    #motto-tip.portrait img { width: auto; height: 100%; }
 
     /* ============================================================
        SLIDE 8 — MID POINT
@@ -602,18 +621,19 @@
     }
     .takeaway-row {
       display: flex; gap: 0.9rem; justify-content: center;
-      flex-wrap: wrap; max-width: 860px;
+      flex-wrap: wrap; max-width: 1720px;
     }
     .takeaway-card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 1rem 1.3rem;
-      flex: 1; min-width: 190px; max-width: 250px;
+      flex: 1; min-width: 380px; max-width: 500px;
       font-size: 1.27rem; line-height: 1.6;
     }
     .takeaway-num { font-size: 1.4rem; margin-bottom: 0.4rem; }
     .closing-spirit {
       margin-top: 1.5rem; font-size: 1.27rem; color: var(--dim);
       font-style: italic; border-top: 1px solid var(--border);
+      white-space: nowrap; align-self: center;
       padding-top: 1rem; max-width: 480px;
     }
 
@@ -668,31 +688,25 @@
        PRESENTER NOTES OVERLAY
        ============================================================ */
     #notes-overlay {
-      position: fixed; inset: 0; z-index: 500;
-      background: rgba(5,10,15,.96);
-      display: none; flex-direction: column; padding: 2rem 2.5rem;
-      overflow-y: auto; transition: background 300ms;
+      position: fixed; bottom: 0; left: 0; right: 0; height: 15%; z-index: 500;
+      background: rgba(5,10,15,.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      display: none; flex-direction: column; padding: 0.5rem 1.5rem 0.6rem;
+      transition: background 300ms; border-top: 1px solid rgba(255,255,255,.15);
     }
     #notes-overlay.vis { display: flex; }
     .notes-top {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      margin-bottom: 1.4rem; padding-bottom: 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.4rem; padding-bottom: 0.4rem;
       border-bottom: 1px solid rgba(255,255,255,.08);
+      flex-shrink: 0;
     }
-    .notes-slide-title { font-size: 1.05rem; font-weight: 700; color: var(--gold); }
-    .notes-time { font-size: 0.78rem; color: var(--dim); margin-top: 0.2rem; }
-    #notes-timer-big {
-      font-size: 2rem; font-weight: 700; color: var(--gold);
-      font-variant-numeric: tabular-nums;
-    }
+    .notes-time { font-size: 0.78rem; color: var(--dim); }
     .notes-close-btn {
       background: none; border: 1px solid rgba(255,255,255,.18);
       color: var(--text); padding: 0.3rem 0.8rem;
       border-radius: 8px; cursor: pointer; font-size: 0.82rem;
     }
-    .notes-body-content { font-size: 0.77rem; line-height: 1.75; color: #A0B0C0; }
-    .notes-body-content ul { margin-left: 1.3rem; }
-    .notes-body-content li { margin-bottom: 0.3rem; }
+    .notes-body-content { font-size: 0.82rem; line-height: 1.5; color: #A0B0C0; overflow-y: auto; flex: 1; }
 
     /* ============================================================
        DEMO MODAL
@@ -726,8 +740,10 @@
     }
     #demo-modal-close:hover { background: var(--surface-hi); color: var(--text); }
 
-    #demo-modal-body { position: relative; }
-    #demo-modal-img  { width: 100%; display: block; aspect-ratio: 16/9; object-fit: contain; }
+    #demo-modal-body { position: relative; overflow: hidden; cursor: grab; }
+    #demo-modal-body.dragging { cursor: grabbing; }
+    #demo-modal-img  { width: 100%; display: block; aspect-ratio: 16/9; object-fit: contain;
+      transform-origin: 0 0; will-change: transform; user-select: none; -webkit-user-drag: none; }
 
     #demo-modal-ph {
       aspect-ratio: 16/9;
@@ -1329,13 +1345,13 @@
          ==================================================== -->
     <section class="slide" id="slide-4">
       <span class="slide-label">課程地圖</span>
-      <div class="section-title">今天的旅程：五個層次</div>
+      <div class="section-title">AI 乾坤：從精益求精到言出法隨的五重境界</div>
       <div class="section-sub">找到你現在站的位置，從那裡出發...</div>
       <div class="layer-map">
         <div class="map-row ml1" onclick="goToSlide(5)">
           <div class="map-icon">🌱</div>
           <div class="map-info">
-            <div class="map-title">Layer 1｜零門檻，立即可用</div>
+            <div class="map-title">Layer 1｜零門檻，立即可用｜<span class="layer-motto" data-img="Demo/「精益求精」.png">「精益求精」</span></div>
             <div class="map-sub">Email 潤飾 / LINE 道務通知 / 貼文生成 / 健康記錄整理</div>
           </div>
           <div class="map-cnt">4 個情境</div>
@@ -1344,7 +1360,7 @@
         <div class="map-row ml2" onclick="goToSlide(6)">
           <div class="map-icon">🌿</div>
           <div class="map-info">
-            <div class="map-title">Layer 2｜稍加嘗試，效益明顯</div>
+            <div class="map-title">Layer 2｜稍加嘗試，效益明顯｜<span class="layer-motto" data-img="Demo/「意在筆先」.png">「意在筆先」</span></div>
             <div class="map-sub">證件照 / 活動海報 / 旅遊地圖 / 財務分析報告</div>
           </div>
           <div class="map-cnt">4 個情境</div>
@@ -1353,7 +1369,7 @@
         <div class="map-row ml3" onclick="goToSlide(8)">
           <div class="map-icon">🌳</div>
           <div class="map-info">
-            <div class="map-title">Layer 3｜需要規劃，產出更完整</div>
+            <div class="map-title">Layer 3｜需要規劃，產出更完整｜<span class="layer-motto" data-img="Demo/「去蕪存菁」.png">「去蕪存菁」</span></div>
             <div class="map-sub">NotebookLM 備課 / 講義審查 / 知識庫 / 活動設計</div>
           </div>
           <div class="map-cnt">4 個情境</div>
@@ -1362,7 +1378,7 @@
         <div class="map-row ml4" onclick="goToSlide(9)">
           <div class="map-icon">🎬</div>
           <div class="map-info">
-            <div class="map-title">Layer 4｜跨工具整合，專業製作</div>
+            <div class="map-title">Layer 4｜跨工具整合，專業製作｜<span class="layer-motto" data-img="Demo/「賦予生命」.png">「賦予生命」</span></div>
             <div class="map-sub">Prompt 工程 / 社青班宣傳動畫完整製作流程</div>
           </div>
           <div class="map-cnt">2 個情境</div>
@@ -1371,7 +1387,7 @@
         <div class="map-row ml5" onclick="goToSlide(10)">
           <div class="map-icon">⚙️</div>
           <div class="map-info">
-            <div class="map-title">Layer 5｜技術深度，職業級應用</div>
+            <div class="map-title">Layer 5｜技術深度，職業級應用｜<span class="layer-motto" data-img="Demo/「言出法隨」.png">「言出法隨」</span></div>
             <div class="map-sub">CAD 自動化工程估算 / Excel 資料分析邏輯設計</div>
           </div>
           <div class="map-cnt">2 個情境</div>
@@ -1386,7 +1402,7 @@
     <section class="slide tint-l1" id="slide-5">
       <span class="slide-label">Layer 1</span>
       <div>
-        <span class="layer-badge badge-l1">🌱 Layer 1 — 零門檻，立即可用</span>
+        <span class="layer-badge badge-l1" data-img="Demo/「精益求精」.png">🌱 Layer 1 — 零門檻，立即可用</span>
         <div class="section-title">只要會打字，今天就能開始</div>
         <div class="section-sub">這 4 個場景，下課後回家就能試</div>
       </div>
@@ -1399,7 +1415,7 @@
     <section class="slide tint-l2" id="slide-6">
       <span class="slide-label">Layer 2</span>
       <div>
-        <span class="layer-badge badge-l2">🌿 Layer 2 — 稍加嘗試，效益明顯</span>
+        <span class="layer-badge badge-l2" data-img="Demo/「意在筆先」.png">🌿 Layer 2 — 稍加嘗試，效益明顯</span>
         <div class="section-title">花一點時間摸索，一旦上手就停不下來</div>
         <div class="section-sub">需要 10–20 分鐘學習，效果很值得</div>
       </div>
@@ -1446,7 +1462,7 @@
     <section class="slide tint-l3" id="slide-8">
       <span class="slide-label">Layer 3</span>
       <div>
-        <span class="layer-badge badge-l3">🌳 Layer 3 — 需要規劃，產出更完整</span>
+        <span class="layer-badge badge-l3" data-img="Demo/「去蕪存菁」.png">🌳 Layer 3 — 需要規劃，產出更完整</span>
         <div class="section-title">前置準備後，產出的價值大幅提升</div>
         <div class="section-sub">⭐ 對講師、幹部效益最高 — 最推薦現場示範的一層</div>
       </div>
@@ -1459,7 +1475,7 @@
     <section class="slide tint-l4" id="slide-9">
       <span class="slide-label">Layer 4</span>
       <div>
-        <span class="layer-badge badge-l4">🎬 Layer 4 — 跨工具整合，專業製作</span>
+        <span class="layer-badge badge-l4" data-img="Demo/「賦予生命」.png">🎬 Layer 4 — 跨工具整合，專業製作</span>
         <div class="section-title">串接多個工具，完成專業級成果</div>
         <div class="section-sub">掌握多工具特性，打造一條完整的製作鏈</div>
       </div>
@@ -1472,7 +1488,7 @@
     <section class="slide tint-l5" id="slide-10">
       <span class="slide-label">Layer 5</span>
       <div>
-        <span class="layer-badge badge-l5">⚙️ Layer 5 — 技術深度，職業級應用</span>
+        <span class="layer-badge badge-l5" data-img="Demo/「言出法隨」.png">⚙️ Layer 5 — 技術深度，職業級應用</span>
         <div class="section-title">你的職業技能 × AI = 獨特競爭力</div>
         <div class="section-sub">AI 在這裡是加速器，你的判斷力才是核心——需要具備專業背景來驗證輸出</div>
       </div>
@@ -1503,7 +1519,7 @@
           </div>
         </div>
         <div class="closing-spirit">
-          就像辦道一樣：不是懂了才去做，是做了才真正懂。
+          就像修辦道一樣：不是懂了才去做，而是做了才開始慢慢懂。
         </div>
       </div>
     </section>
@@ -1607,11 +1623,7 @@
   <!-- Presenter Notes Overlay -->
   <div id="notes-overlay">
     <div class="notes-top">
-      <div>
-        <div class="notes-slide-title" id="notes-title">標題封面</div>
-        <div class="notes-time" id="notes-timing">課前播放</div>
-        <div id="notes-timer-big">00:00</div>
-      </div>
+      <div class="notes-time" id="notes-timing">課前播放</div>
       <button class="notes-close-btn" onclick="toggleNotes()">關閉 (N)</button>
     </div>
     <div class="notes-body-content" id="notes-body"></div>
@@ -1640,6 +1652,7 @@
     </div>
   </div>
 
+<div id="motto-tip"><img id="motto-tip-img" src="" alt=""></div>
 </div><!-- end app -->
 
 <script>
@@ -1750,6 +1763,8 @@ const SCENARIOS = [
 const NOTES = [
   { title:'標題封面', timing:'課前播放（設定為待機畫面）',
     points:['確認投影機已連接正常，解析度選 1920×1080','麥克風音量測試','室內光線稍暗，投影效果更佳','準備水杯，這是 80 分鐘的課'] },
+  { title:'AI 發展里程碑', timing:'選用（背景補充，可跳過）',
+    points:['這頁是選用背景頁，時間緊可直接跳過','適合用於「為什麼現在學 AI？」的鋪墊','可請學員找找哪個工具他們認得','指向 2022–2023 爆發期，說明普及速度之快'] },
   { title:'開場破除迷思', timing:'0:00–2:00（2 分鐘）',
     points:['直接開場，不要太多自我介紹','問現場：「有多少人覺得 AI 很難用？」讓他們舉手','引用自身經驗：「我第一次用 ChatGPT 也以為要懂程式...」','目標：讓所有人感覺 AI 跟自己有關係'] },
   { title:'破冰互動', timing:'2:00–5:00（3 分鐘）',
@@ -1757,7 +1772,7 @@ const NOTES = [
   { title:'三個正確心態', timing:'5:00–10:00（5 分鐘）',
     points:['「帶徒弟」這個比喻對道場學員特別有共鳴','強調「你的判斷力才是核心」— 讓學員感到被賦能','道親優勢那段要念出來，讓他們感到驕傲','動畫是自動的，等三個 block 全出現後再繼續講'] },
   { title:'課程地圖', timing:'10:00–12:00（2 分鐘）',
-    points:['快速帶過，告訴學員可以點擊跳轉','「等一下如果你覺得某一層更有興趣，告訴我，我們跳過去」','確認學員理解五層是「按需選擇」而非「必須全部用到」','按數字 1–5 可快速跳到各層'] },
+    points:['潤飾：精益求精 (起)','繪圖：意在筆先 (承)','彙整：去蕪存菁 (轉)','影音：賦予生命 (進)','代理：言出法隨 (合)'] },
   { title:'Layer 1 — 零門檻', timing:'12:00–24:00（12 分鐘，每卡約 3 分鐘）',
     points:['點擊卡片展開詳細說明','⭐ 重點示範：LINE 通知優化（現場最多人有感）','問「有在幫道場管理 LINE 群組的請舉手」','如有時間，讓學員現場打一段公告草稿，一起貼給 AI'] },
   { title:'Layer 2 — 稍加嘗試', timing:'24:00–36:00（12 分鐘）',
@@ -1826,7 +1841,7 @@ function buildCard(s) {
         <div class="sc-info">
           <div class="sc-title-row">
             <div class="sc-title">${s.title}</div>
-            <button class="demo-badge" onclick="event.stopPropagation();openDemo('${s.id}')" title="查看 Demo ${s.id} 示範圖片">🎯 Demo ${s.id}</button>
+            <button class="demo-badge" data-demo-id="${s.id}" onclick="event.stopPropagation();openDemo('${s.id}')" title="查看 Demo ${s.id} 示範圖片">🎯 Demo ${s.id}</button>
           </div>
           <div class="sc-tools">🔧 ${s.tools}</div>
         </div>
@@ -1958,15 +1973,10 @@ function timerClick() {
     state.timerStart = null; state.timerInterval = null;
     document.getElementById('timer-widget').textContent = '00:00';
     document.getElementById('timer-widget').classList.remove('running');
-    const nb = document.getElementById('notes-timer-big');
-    if (nb) nb.textContent = '00:00';
   }
 }
 function updateTimerDisplays() {
-  const t = formatTime(Date.now() - state.timerStart);
-  document.getElementById('timer-widget').textContent = t;
-  const nb = document.getElementById('notes-timer-big');
-  if (nb) nb.textContent = t;
+  document.getElementById('timer-widget').textContent = formatTime(Date.now() - state.timerStart);
 }
 function formatTime(ms) {
   const m = Math.floor(ms/60000), s = Math.floor((ms%60000)/1000);
@@ -1987,10 +1997,8 @@ function toggleNotes() {
 function renderNotes() {
   const n = NOTES[state.slide];
   if (!n) return;
-  document.getElementById('notes-title').textContent = n.title;
   document.getElementById('notes-timing').textContent = n.timing;
-  document.getElementById('notes-body').innerHTML =
-    `<ul>${n.points.map(p=>`<li>${p}</li>`).join('')}</ul>`;
+  document.getElementById('notes-body').innerHTML = n.points.join(' ｜ ');
 }
 
 /* ============================================================
@@ -2084,6 +2092,7 @@ function showCarouselFrame() {
   const imgs  = _carousel.images;
   const idx   = _carousel.idx;
 
+  resetImgView();
   imgEl.src = imgs[idx];
   imgEl.style.display = 'block';
   phEl.classList.add('hidden');
@@ -2102,6 +2111,21 @@ function carouselStep(delta) {
   showCarouselFrame();
 }
 
+function probeDemoBadges() {
+  document.querySelectorAll('.demo-badge[data-demo-id]').forEach(btn => {
+    const id = btn.dataset.demoId;
+    tryOneSrc('Demo/Demo' + id + '-0', DEMO_EXTS, 0, function(url) {
+      if (url) { btn.classList.add('has-demo'); return; }
+      tryOneSrc('Demo/Demo' + id + '-1', DEMO_EXTS, 0, function(url2) {
+        if (url2) { btn.classList.add('has-demo'); return; }
+        tryOneSrc('Demo/Demo' + id, DEMO_EXTS, 0, function(url3) {
+          if (url3) btn.classList.add('has-demo');
+        });
+      });
+    });
+  });
+}
+
 function tryDemoImage(base, exts, idx, imgEl, phEl) {
   if (idx >= exts.length) return; // 全部嘗試完，維持佔位畫面
   const probe = new Image();
@@ -2116,11 +2140,68 @@ function tryDemoImage(base, exts, idx, imgEl, phEl) {
   probe.src = base + '.' + exts[idx];
 }
 
+/* ============================================================
+   IMAGE ZOOM / PAN
+   ============================================================ */
+let _iv = { scale:1, tx:0, ty:0, drag:false, ox:0, oy:0 };
+
+function _applyIV() {
+  const img = document.getElementById('demo-modal-img');
+  if (img) img.style.transform = `translate(${_iv.tx}px,${_iv.ty}px) scale(${_iv.scale})`;
+}
+
+function resetImgView() {
+  _iv = { scale:1, tx:0, ty:0, drag:false, ox:0, oy:0 };
+  const img = document.getElementById('demo-modal-img');
+  if (img) img.style.transform = '';
+}
+
+function initImgZoomPan() {
+  const body = document.getElementById('demo-modal-body');
+
+  body.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    const f = e.deltaY < 0 ? 1.15 : 1/1.15;
+    const ns = Math.max(0.25, Math.min(10, _iv.scale * f));
+    const r = body.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    _iv.tx = mx - (mx - _iv.tx) * (ns / _iv.scale);
+    _iv.ty = my - (my - _iv.ty) * (ns / _iv.scale);
+    _iv.scale = ns;
+    _applyIV();
+  }, { passive:false });
+
+  body.addEventListener('mousedown', function(e) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    _iv.drag = true;
+    _iv.ox = e.clientX - _iv.tx;
+    _iv.oy = e.clientY - _iv.ty;
+    body.classList.add('dragging');
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!_iv.drag) return;
+    _iv.tx = e.clientX - _iv.ox;
+    _iv.ty = e.clientY - _iv.oy;
+    _applyIV();
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (!_iv.drag) return;
+    _iv.drag = false;
+    document.getElementById('demo-modal-body').classList.remove('dragging');
+  });
+
+  body.addEventListener('dblclick', resetImgView);
+}
+
 function closeDemoModal() {
   document.getElementById('demo-modal').classList.remove('vis');
   document.getElementById('demo-modal-img').src = '';
   document.getElementById('demo-carousel-nav').classList.remove('vis');
   _carousel = { images: [], idx: 0 };
+  resetImgView();
 }
 
 function initKeyboard() {
@@ -2140,6 +2221,7 @@ function initKeyboard() {
       case 'd': case 'D':          e.preventDefault(); navigateNext(); break;
       case 'Escape': closeDemoModal(); break;
       case 'n': case 'N': toggleNotes(); break;
+      case 'l': case 'L': toggleTheme(); break;
       case 'f': case 'F': toggleFullscreen(); break;
       case 'Home': goToSlide(0); break;
       case 'End':  goToSlide(state.total-1); break;
@@ -2170,8 +2252,41 @@ function selectDemo(btn) {
 /* ============================================================
    INIT
    ============================================================ */
+function initMottoTips() {
+  const tip = document.getElementById('motto-tip');
+  const tipImg = document.getElementById('motto-tip-img');
+  let _timer = null;
+
+  document.querySelectorAll('.layer-motto, .layer-badge[data-img]').forEach(el => {
+    el.addEventListener('mouseenter', function(e) {
+      tip.classList.remove('landscape', 'portrait');
+      tipImg.onload = function() {
+        tip.classList.add(tipImg.naturalHeight > tipImg.naturalWidth ? 'portrait' : 'landscape');
+        tip.classList.add('vis');
+      };
+      tipImg.src = el.dataset.img;
+    });
+
+    el.addEventListener('mousemove', function(e) {
+      const r = tip.getBoundingClientRect();
+      const tw = r.width || 800, th = r.height || 200;
+      const x = e.clientX + 16, y = e.clientY + 16;
+      const left = x + tw > window.innerWidth  ? Math.max(0, e.clientX - tw - 8) : x;
+      const top  = y + th > window.innerHeight ? Math.max(0, e.clientY - th - 8) : y;
+      tip.style.left = left + 'px';
+      tip.style.top  = top  + 'px';
+    });
+
+    el.addEventListener('mouseleave', function() {
+      clearTimeout(_timer);
+      tip.classList.remove('vis');
+      tipImg.src = '';
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  initCards(); initDots(); initParticles(); initKeyboard(); initTouch();
+  initCards(); initDots(); initParticles(); initKeyboard(); initTouch(); probeDemoBadges(); initImgZoomPan(); initMottoTips();
   document.querySelectorAll('.slide')[0].classList.add('active');
   updateProgress(); updateNavBtns();
 });
