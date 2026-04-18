@@ -542,7 +542,7 @@
     .map-row.ml4 .map-cnt { background: rgba(0,121,107,.14);  color: var(--l4); }
     .map-row.ml5 .map-cnt { background: rgba(46,125,50,.14);  color: var(--l5); }
     .map-arrow { color: var(--dim); font-size: 0.85rem; }
-    .layer-motto { cursor: default; text-decoration: underline dotted rgba(255,255,255,.3); }
+    .layer-motto, .sc-title[data-img], .section-title[data-img] { cursor: default; text-decoration: underline dotted rgba(255,255,255,.3); }
     #motto-tip {
       position: fixed; z-index: 900; pointer-events: none;
       border-radius: 10px; overflow: hidden;
@@ -1403,7 +1403,7 @@
       <span class="slide-label">Layer 1</span>
       <div>
         <span class="layer-badge badge-l1" data-img="Demo/「精益求精」.png">🌱 Layer 1 — 零門檻，立即可用</span>
-        <div class="section-title">只要會打字，今天就能開始</div>
+        <div class="section-title" data-img="Demo/「只要會打字，今天就能開始」.png">只要會打字，今天就能開始</div>
         <div class="section-sub">這 4 個場景，下課後回家就能試</div>
       </div>
       <div class="cards-grid" id="cards-l1"></div>
@@ -1660,25 +1660,25 @@
    SCENARIOS DATA
    ============================================================ */
 const SCENARIOS = [
-  { id:1, layer:1, emoji:'✉️',
+  { id:1, layer:1, emoji:'✉️', titleImg:'Demo/「Email 回覆潤飾」.png',
     title:'Email 回覆潤飾', tools:'ChatGPT、Gemini',
     desc:'將已寫好的 Email 草稿貼給 AI，請它針對語氣、措辭、結構進行潤飾。特別適用於需要正式回覆的對外信件，例如廠商往來、業主溝通、官方函文。',
     usage:'貼上草稿 → 說明對象與場合 → 請 AI 潤飾語氣',
     note:'tip', noteText:'範例指令：「請把這封信改成對廠商的正式回信，語氣要禮貌但有立場」',
     savings:'省下 10–20 分鐘 / 封' },
-  { id:2, layer:1, emoji:'💬',
+  { id:2, layer:1, emoji:'💬', titleImg:'Demo/「LINE 道務通知優化」.png',
     title:'LINE 道務通知優化', tools:'ChatGPT、Gemini、Claude',
     desc:'將道務公告初稿貼給 AI，確認資訊是否完整（時間、地點、對象、注意事項）、語氣是否一致、有無錯別字。可進一步建立固定的公告格式模板，日後只需更換關鍵資訊。',
     usage:'貼上初稿 → 請 AI 檢查完整性與語氣 → 建立固定模板',
     note:'tip', noteText:'範例指令：「這是社青班的活動通知，請確認資訊完整，並讓語氣更清楚友善」',
     savings:'每次節省約 15 分鐘' },
-  { id:3, layer:1, emoji:'📢',
+  { id:3, layer:1, emoji:'📢', titleImg:'Demo/「社群小編貼文生成」.png',
     title:'社群小編貼文生成', tools:'ChatGPT、Gemini、Claude',
     desc:'輸入活動主題、目標受眾、發文平台，請 AI 生成第一版貼文文案。可同時生成多種風格（正式感謝型、輕鬆活潑型、故事敘述型），再由人工挑選最合適的版本做最後修改。',
     usage:'說明主題與對象 → 指定風格 → 挑選版本修改',
     note:'tip', noteText:'範例指令：「幫我為4/25的AI工具課程，生成3種不同風格的FB招生貼文」',
     savings:'從 30 分鐘縮短到 5 分鐘' },
-  { id:4, layer:1, emoji:'🏥',
+  { id:4, layer:1, emoji:'🏥', titleImg:'Demo/「健康狀況初步整理」.png',
     title:'健康狀況初步整理', tools:'ChatGPT、Gemini',
     desc:'將近期身體狀況用口語描述給 AI，請它整理成結構化的觀察記錄（症狀名稱、發生頻率、可能誘發因素），就醫時直接出示，讓醫師快速掌握狀況，大幅提升問診效率。',
     usage:'描述症狀 → 請 AI 整理記錄 → 就醫前備用',
@@ -1840,7 +1840,7 @@ function buildCard(s) {
         <div class="sc-emoji">${s.emoji}</div>
         <div class="sc-info">
           <div class="sc-title-row">
-            <div class="sc-title">${s.title}</div>
+            <div class="sc-title"${s.titleImg ? ` data-img="${s.titleImg}"` : ''}>${s.title}</div>
             <button class="demo-badge" data-demo-id="${s.id}" onclick="event.stopPropagation();openDemo('${s.id}')" title="查看 Demo ${s.id} 示範圖片">🎯 Demo ${s.id}</button>
           </div>
           <div class="sc-tools">🔧 ${s.tools}</div>
@@ -2257,7 +2257,7 @@ function initMottoTips() {
   const tipImg = document.getElementById('motto-tip-img');
   let _timer = null;
 
-  document.querySelectorAll('.layer-motto, .layer-badge[data-img]').forEach(el => {
+  document.querySelectorAll('.layer-motto, .layer-badge[data-img], .section-title[data-img], .sc-title[data-img]').forEach(el => {
     el.addEventListener('mouseenter', function(e) {
       tip.classList.remove('landscape', 'portrait');
       tipImg.onload = function() {
