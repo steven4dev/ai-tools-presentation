@@ -1489,7 +1489,7 @@
       <span class="slide-label">Layer 5</span>
       <div>
         <span class="layer-badge badge-l5" data-img="Demo/「言出法隨」.png">⚙️ Layer 5 — 技術深度，職業級應用</span>
-        <div class="section-title">你的職業技能 × AI = 獨特競爭力</div>
+        <div class="section-title" data-img="Demo/「你的職業技能 × AI = 獨特競爭力」.png">你的職業技能 × AI = 獨特競爭力</div>
         <div class="section-sub">AI 在這裡是加速器，你的判斷力才是核心——需要具備專業背景來驗證輸出</div>
       </div>
       <div class="cards-grid" id="cards-l5"></div>
@@ -1683,7 +1683,7 @@ const SCENARIOS = [
     desc:'將近期身體狀況用口語描述給 AI，請它整理成結構化的觀察記錄（症狀名稱、發生頻率、可能誘發因素），就醫時直接出示，讓醫師快速掌握狀況，大幅提升問診效率。',
     usage:'描述症狀 → 請 AI 整理記錄 → 就醫前備用',
     note:'warn', noteText:'AI 提供參考方向，無法取代醫師診斷，重要症狀務必就醫' },
-  { id:5, layer:2, emoji:'📸',
+  { id:5, layer:2, emoji:'📸', titleImg:'Demo/「生活照轉專業證件照」.png',
     title:'生活照轉專業證件照', tools:'Gemini',
     desc:'使用 Gemini 的圖像生成功能，上傳一張日常生活照，再用文字描述需要的風格（白底、正式西裝、柔和燈光、半身照），即可生成接近攝影棚水準的證件照。',
     usage:'上傳照片 → 描述想要的風格與背景 → 生成下載',
@@ -1710,7 +1710,7 @@ const SCENARIOS = [
     usage:'上傳多份資料 → AI 分析彙整 → 生成大綱與簡報',
     note:'tip', noteText:'相較傳統備課方式（逐本閱讀、手動整理筆記），節省 60% 以上的備課時間',
     savings:'備課時間省下 60%+' },
-  { id:10, layer:3, emoji:'🔍',
+  { id:10, layer:3, emoji:'🔍', titleImg:'Demo/「PDF 講義品質檢查」.png',
     title:'PDF 講義品質檢查', tools:'NotebookLM（Google）、Claude',
     desc:'將課程講義的 PDF 上傳給 AI，請它逐段掃描全文，標出疑似錯別字、語意不通順的段落、前後不一致的用詞、格式排版問題。AI 作為客觀的「第二雙眼睛」。',
     usage:'上傳 PDF → 請 AI 掃描全文 → 逐一確認修正建議',
@@ -1725,12 +1725,12 @@ const SCENARIOS = [
     desc:'用 AI 構思具啟發性的互動教學情境、設計體驗活動的流程與引導問題，將傳統道義融入現代學員容易接受的體驗形式。AI 是靈感激發者與初稿產生器。',
     usage:'說明課程主題與對象 → 請 AI 設計活動流程 → 人工調整',
     note:'tip', noteText:'範例指令：「設計適合25-45歲道親、30分鐘的破冰活動，要有趣但不失莊重」' },
-  { id:13, layer:4, emoji:'🖼️',
+  { id:13, layer:4, emoji:'🖼️', titleImg:'Demo/「AI 圖像生成與 Prompt 工程」.png',
     title:'AI 圖像生成與 Prompt 工程', tools:'ChatGPT (DALL-E)、Gemini (Nano Banana)、NotebookLM',
     desc:'掌握撰寫高品質圖像生成提示詞（Prompt）的核心技術，包含鏡頭焦距、光影方向、畫面構圖、圖像風格，進一步應用於動畫分鏡設計，讓圖像生成結果高度可控。',
     usage:'學習 Prompt 語法 → 描述構圖與風格 → 反覆調整優化',
     note:'tip', noteText:'範例：「85mm 人像鏡頭，逆光，黃金時刻，吉卜力動漫風格，三分法構圖」' },
-  { id:14, layer:4, emoji:'🎬',
+  { id:14, layer:4, emoji:'🎬', titleImg:'Demo/「社青班招生宣傳動畫」.png',
     title:'社青班招生宣傳動畫', tools:'ChatGPT + Gemini + Grok + Suno',
     desc:'整合四個 AI 工具完成完整動畫製作流水線：ChatGPT 寫腳本與分鏡 → Gemini 生成圖像素材 → Grok 轉換動態影片 → Suno 生成配樂。過去需要一個專業製作團隊，現在一個人就能完成。',
     usage:'寫腳本 → 生圖 → 轉影片 → 配樂 → 完成 60 秒宣傳片',
