@@ -1,0 +1,2331 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 工具的應用｜全真道院社青班 v9</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       CSS CUSTOM PROPERTIES — DARK MODE (default)
+       ============================================================ */
+    :root {
+      --l1: #8BC34A;
+      --l2: #4CAF50;
+      --l3: #009688;
+      --l4: #00796B;
+      --l5: #2E7D32;
+      --bg: #0F1923;
+      --surface: rgba(255,255,255,0.07);
+      --surface-hi: rgba(255,255,255,0.13);
+      --gold: #F4B942;
+      --red: #EF5350;
+      --text: #E4E9F0;
+      --dim: #7A8CA0;
+      --border: rgba(255,255,255,0.12);
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.45);
+    }
+
+    /* ============================================================
+       LIGHT MODE OVERRIDES — v3 強化對比，確保投影機可讀性
+       ============================================================ */
+    body.light {
+      --bg:         #EEF2F7;
+      --surface:    rgba(0,0,0,0.05);
+      --surface-hi: rgba(0,0,0,0.09);
+      --text:       #0E1825;
+      --dim:        #374151;
+      --border:     rgba(0,0,0,0.14);
+      --shadow:     0 2px 16px rgba(0,0,0,0.14);
+      --gold:       #A56F00;
+      --l1:         #558B2F;
+      --l2:         #2E7D32;
+      --l3:         #00695C;
+      --l4:         #004D40;
+      --l5:         #1B5E20;
+    }
+    body.light #slide-0 {
+      background: radial-gradient(ellipse at 30% 60%, rgba(85,139,47,.12), transparent 55%),
+                  radial-gradient(ellipse at 80% 20%, rgba(165,111,0,.08), transparent 50%),
+                  #EEF2F7;
+    }
+    body.light #slide-nav        { background: rgba(220,228,238,0.94); }
+    body.light .ctrl-btn         { background: rgba(220,228,238,0.9); color: var(--dim); }
+    body.light .ctrl-btn:hover   { color: var(--text); border-color: rgba(0,0,0,0.18); }
+    body.light #timer-widget     { background: transparent; border-color: transparent; }
+    body.light #notes-overlay    { background: rgba(235,241,248,0.98); }
+    body.light .notes-body-content { color: #1E2D3E; }
+    body.light .notes-slide-title  { color: var(--gold); }
+    body.light .notes-top        { border-bottom-color: rgba(0,0,0,0.1); }
+    body.light .notes-close-btn  { border-color: rgba(0,0,0,0.2); color: var(--text); }
+    body.light #progress-bar     { background: rgba(0,0,0,0.08); }
+    body.light #btn-home         { background: rgba(220,228,238,0.94); }
+    body.light #kbd-hint         { color: #4A5A6A; opacity: 0.7; }
+    body.light .cmp-list li      { border-bottom-color: rgba(0,0,0,0.06); }
+    body.light .sc-card:hover    { border-color: rgba(0,0,0,0.22); }
+    body.light .tool-chip:hover  { border-color: rgba(0,0,0,0.25); }
+    body.light .map-row:hover    { border-color: rgba(0,0,0,0.2); }
+    body.light .sc-note.tip      { background: rgba(165,111,0,.10); color: #7A5000; }
+    body.light .sc-note.warn     { background: rgba(183,28,28,.08); color: #B71C1C; }
+    body.light .sc-savings       { color: var(--l2); }
+    body.light .title-main {
+      background: linear-gradient(135deg, var(--l1) 0%, var(--gold) 50%, var(--l2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    body.light .insight-q        { color: var(--gold); }
+    body.light .hook-q           { color: var(--gold); }
+    body.light .title-tag        { color: var(--gold); }
+    body.light .fs-group         { background: rgba(220,228,238,0.9); }
+    body.light .fs-sep           { background: rgba(0,0,0,0.18); }
+    body.light .fs-btn           { color: var(--dim); }
+    body.light .fs-btn:hover:not(:disabled) { color: var(--text); }
+    body.light .demo-badge       { color: var(--dim); border-color: var(--border); }
+    body.light .demo-badge:hover { color: var(--layer-c, var(--gold)); border-color: var(--layer-c, var(--gold)); }
+    body.light #demo-modal       { background: rgba(0,0,0,0.6); }
+    body.light #demo-modal-box   { background: var(--bg); }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 22px; } /* 投影機放大基底：16px → 22px，所有 rem 等比放大 */
+
+    body {
+      font-family: 'Noto Sans TC', '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      transition: background 300ms ease, color 300ms ease;
+    }
+
+    button { font-family: inherit; }
+
+    /* ============================================================
+       LAYOUT
+       ============================================================ */
+    #app { position: relative; width: 100%; height: 100dvh; overflow: hidden; }
+
+    /* Progress bar */
+    #progress-bar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 3px; background: rgba(255,255,255,0.08); z-index: 200;
+      transition: background 300ms;
+    }
+    #progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--l1), var(--gold));
+      transition: width 380ms ease;
+      will-change: width;
+    }
+
+    /* ── TOP-RIGHT CONTROLS ── */
+    #top-controls {
+      position: fixed; top: 0.75rem; right: 1rem; z-index: 200;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+
+    /* Shared control button style */
+    .ctrl-btn {
+      background: rgba(15,25,35,0.75); backdrop-filter: blur(8px);
+      border: 1px solid transparent; border-radius: 20px;
+      padding: 0.28rem 0.65rem; cursor: pointer;
+      color: var(--dim); font-size: 0.85rem;
+      transition: all 200ms; line-height: 1.4;
+      display: flex; align-items: center; justify-content: center;
+      min-width: 2.1rem;
+    }
+    .ctrl-btn:hover { border-color: var(--border); color: var(--text); }
+
+    /* Timer */
+    #timer-widget {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.78rem;
+      cursor: pointer;
+      min-width: 3.4rem; text-align: center;
+    }
+    #timer-widget.running { color: var(--gold); }
+
+    /* ── iPhone-style font size group ── */
+    .fs-group {
+      display: flex; align-items: center;
+      background: rgba(15,25,35,0.75); backdrop-filter: blur(8px);
+      border: 1px solid transparent; border-radius: 20px;
+      overflow: hidden; transition: border-color 200ms;
+    }
+    .fs-group:hover { border-color: var(--border); }
+    .fs-btn {
+      background: none; border: none; border-radius: 0;
+      padding: 0.28rem 0.62rem; color: var(--dim); cursor: pointer;
+      font-size: 0.82rem; transition: color 200ms, opacity 200ms;
+      line-height: 1.4; font-family: inherit; font-weight: 700;
+    }
+    .fs-btn:hover:not(:disabled) { color: var(--text); }
+    .fs-btn:disabled { opacity: 0.28; cursor: not-allowed; }
+    .fs-sep {
+      width: 1px; height: 1rem;
+      background: rgba(255,255,255,0.2); flex-shrink: 0;
+    }
+
+    /* ── HOME BUTTON (bottom-left) ── */
+    #btn-home {
+      position: fixed; bottom: 1.1rem; left: 1rem; z-index: 200;
+      background: rgba(15,25,35,0.88); backdrop-filter: blur(14px);
+      border: 1px solid var(--border); border-radius: 50px;
+      padding: 0.42rem 0.72rem; font-size: 1rem;
+      cursor: pointer; line-height: 1;
+      transition: all 180ms; color: var(--text);
+    }
+    #btn-home:hover { background: var(--surface-hi); transform: scale(1.08); }
+    #btn-home[hidden] { display: none; }
+
+    /* Slides container */
+    #slides-container {
+      position: relative; width: 100%; height: 100dvh; overflow: hidden;
+    }
+
+    /* Individual slide */
+    .slide {
+      position: absolute; inset: 0;
+      opacity: 0; transform: translateY(18px);
+      transition: opacity 360ms ease, transform 360ms ease;
+      pointer-events: none;
+      display: flex; flex-direction: column;
+      padding: 5% 7% 7%;
+      overflow: hidden;
+    }
+    .slide.active {
+      opacity: 1; transform: translateY(0);
+      pointer-events: all;
+      overflow-y: auto;
+    }
+
+    /* Slide label (top-left) */
+    .slide-label {
+      position: absolute; top: 0.9rem; left: 1.4rem;
+      font-size: 0.77rem; color: var(--dim); opacity: 0.5;
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+
+    /* Navigation */
+    #slide-nav {
+      position: fixed; bottom: 1.0rem; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 0.8rem;
+      z-index: 200;
+      background: rgba(15,25,35,0.25);
+      backdrop-filter: blur(3px);
+      padding: 0.45rem 1.1rem;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+      transition: background 300ms;
+    }
+    .nav-btn {
+      background: none; border: none; color: var(--text);
+      font-size: 0.6rem; cursor: pointer;
+      padding: 0.2rem 0.5rem; border-radius: 8px;
+      transition: background 180ms; line-height: 1;
+    }
+    .nav-btn:hover { background: var(--surface-hi); }
+    .nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+    #dot-indicators { display: flex; gap: 0.3rem; align-items: center; }
+    .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--dim); cursor: pointer; transition: all 180ms;
+    }
+    .dot.active { background: var(--gold); transform: scale(1.5); }
+
+    #slide-counter {
+      font-size: 0.72rem; color: var(--dim);
+      min-width: 3.2rem; text-align: center;
+    }
+
+    /* Keyboard hint */
+    #kbd-hint {
+      position: fixed; bottom: 1.0rem; right: 1rem;
+      font-size: 0.66rem; color: var(--dim); opacity: 0.45;
+      z-index: 100; text-align: right; line-height: 1.5;
+      transition: color 300ms;
+    }
+
+    /* ============================================================
+       COMMON COMPONENTS
+       ============================================================ */
+    .layer-badge {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.3rem 0.9rem; border-radius: 50px;
+      font-size: 0.78rem; font-weight: 700; margin-bottom: 0.8rem;
+      letter-spacing: 0.02em;
+    }
+    .badge-l1 { background: rgba(139,195,74,.14); color: var(--l1); }
+    .badge-l2 { background: rgba(76,175,80,.14);  color: var(--l2); }
+    .badge-l3 { background: rgba(0,150,136,.14);  color: var(--l3); }
+    .badge-l4 { background: rgba(0,121,107,.14);  color: var(--l4); }
+    .badge-l5 { background: rgba(46,125,50,.14);  color: var(--l5); }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.05rem);
+      font-weight: 700; line-height: 1.5; margin-bottom: 1rem; text-align: left;
+    }
+    .section-sub {
+      font-size: clamp(0.82rem, 1.6vw, 1rem);
+      color: var(--dim); margin-bottom: 1.5rem;
+    }
+
+    /* Cards grid */
+    .cards-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 0.85rem; flex: 1;
+    }
+
+    /* Scenario card */
+    .sc-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      cursor: pointer; transition: border-color 200ms, box-shadow 200ms;
+      display: flex; flex-direction: column;
+    }
+    .sc-card:hover { border-color: rgba(255,255,255,0.25); box-shadow: var(--shadow); }
+    .sc-card.open { box-shadow: var(--shadow); }
+
+    .sc-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.85rem 1rem; flex-shrink: 0;
+    }
+    .sc-emoji { font-size: 1.5rem; flex-shrink: 0; }
+    .sc-info { flex: 1; min-width: 0; }
+
+    /* v4: title row with demo badge */
+    .sc-title-row {
+      display: flex; align-items: center; gap: 0.45rem;
+    }
+    .sc-title-row .sc-title {
+      flex: 1; min-width: 0;
+    }
+    .sc-title {
+      font-size: 1.27rem; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sc-tools { font-size: 0.77rem; color: var(--dim); margin-top: 0.12rem; }
+    .sc-chevron { color: var(--dim); font-size: 0.75rem; transition: transform 300ms; }
+    .sc-card.open .sc-chevron { transform: rotate(180deg); }
+
+    /* Demo badge button */
+    .demo-badge {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 0.1rem 0.5rem;
+      font-size: 0.77rem; font-weight: 700;
+      color: var(--dim); cursor: pointer;
+      white-space: nowrap; flex-shrink: 0;
+      transition: all 160ms; line-height: 1.6;
+      font-family: inherit;
+    }
+    .demo-badge:hover {
+      border-color: var(--layer-c, var(--gold));
+      color: var(--layer-c, var(--gold));
+    }
+    .demo-badge.has-demo {
+      border-color: var(--gold);
+      color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(244,185,66,.35), 0 0 8px rgba(244,185,66,.25);
+    }
+
+    .sc-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 380ms cubic-bezier(0.4,0,0.2,1);
+    }
+    .sc-card.open .sc-body { max-height: 380px; }
+    .sc-body-inner {
+      padding: 0 1rem 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+    .sc-desc {
+      font-size: 1.27rem; color: var(--dim);
+      line-height: 1.6; margin-top: 0.7rem; margin-bottom: 0.7rem; text-align: left;
+    }
+    .sc-usage {
+      background: rgba(255,255,255,0.04); border-radius: 8px;
+      padding: 0.55rem 0.8rem;
+      border-left: 3px solid var(--layer-c, #8BC34A);
+      font-size: 1.27rem; line-height: 1.6;
+    }
+    .sc-usage-lbl {
+      font-weight: 700; font-size: 0.77rem;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 0.2rem; color: var(--layer-c, #8BC34A);
+    }
+    .sc-note {
+      font-size: 0.77rem; margin-top: 0.55rem;
+      padding: 0.4rem 0.6rem; border-radius: 6px;
+    }
+    .sc-note.tip  { background: rgba(244,185,66,.08); color: var(--gold); }
+    .sc-note.warn { background: rgba(239,83,80,.08);  color: #EF9090; }
+    .sc-savings {
+      font-size: 0.77rem; font-weight: 700;
+      margin-top: 0.45rem; color: var(--layer-c, #8BC34A);
+    }
+
+    /* Layer color per card */
+    .card-l1 { --layer-c: var(--l1); }
+    .card-l2 { --layer-c: var(--l2); }
+    .card-l3 { --layer-c: var(--l3); }
+    .card-l4 { --layer-c: var(--l4); }
+    .card-l5 { --layer-c: var(--l5); }
+
+    /* Layer background tint */
+    .tint-l1::after { background: radial-gradient(ellipse at 80% 15%, rgba(139,195,74,.06), transparent 60%); }
+    .tint-l2::after { background: radial-gradient(ellipse at 80% 15%, rgba(76,175,80,.06),  transparent 60%); }
+    .tint-l3::after { background: radial-gradient(ellipse at 80% 15%, rgba(0,150,136,.06),  transparent 60%); }
+    .tint-l4::after { background: radial-gradient(ellipse at 80% 15%, rgba(0,121,107,.06),  transparent 60%); }
+    .tint-l5::after { background: radial-gradient(ellipse at 80% 15%, rgba(46,125,50,.06),   transparent 60%); }
+    .tint-l1::after, .tint-l2::after, .tint-l3::after, .tint-l4::after, .tint-l5::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .tint-l1 > *, .tint-l2 > *, .tint-l3 > *, .tint-l4 > *, .tint-l5 > * {
+      position: relative; z-index: 1;
+    }
+
+    /* ============================================================
+       SLIDE 1 — TITLE
+       ============================================================ */
+    #slide-0 {
+      background: radial-gradient(ellipse at 30% 60%, rgba(139,195,74,.06), transparent 55%),
+                  radial-gradient(ellipse at 80% 20%, rgba(244,185,66,.04), transparent 50%),
+                  var(--bg);
+      justify-content: center; align-items: center; text-align: center;
+      padding: 2rem; transition: background 300ms;
+    }
+    .title-main {
+      font-size: clamp(2.8rem, 6vw, 3.32rem); font-weight: 700; line-height: 1.5;
+      background: linear-gradient(135deg, var(--l1) 0%, var(--gold) 50%, var(--l2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 1rem;
+    }
+    .title-sub {
+      font-size: clamp(1rem, 2.2vw, 1.4rem); color: var(--dim);
+      font-weight: 300; margin-bottom: 2rem;
+    }
+    .title-meta {
+      display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 1.8rem;
+    }
+    .meta-item { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+    .meta-item span { font-size: 0.72rem; color: var(--dim); }
+    .meta-item strong { font-size: 0.95rem; }
+    .title-tag {
+      font-size: 0.85rem; color: var(--gold); opacity: 0.85; font-style: italic;
+    }
+    /* Particles */
+    #particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .particle {
+      position: absolute; border-radius: 50%;
+      opacity: 0; animation: pfloat linear infinite;
+    }
+    @keyframes pfloat {
+      0%   { transform: translateY(110vh); opacity: 0; }
+      8%   { opacity: .14; }
+      92%  { opacity: .14; }
+      100% { transform: translateY(-80px); opacity: 0; }
+    }
+
+    /* ============================================================
+       SLIDE 2 — OPENING HOOK
+       ============================================================ */
+    .compare-grid {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      gap: 1.2rem; align-items: center; flex: 1; margin-top: 0.5rem;
+    }
+    .cmp-col {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.3rem;
+      height: 100%; display: flex; flex-direction: column;
+    }
+    .cmp-col.wrong { border-color: rgba(239,83,80,.28); background: rgba(239,83,80,.04); }
+    .cmp-col.right  { border-color: rgba(139,195,74,.28); background: rgba(139,195,74,.04); }
+    .cmp-lbl {
+      font-size: 0.77rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 0.9rem;
+    }
+    .cmp-lbl.wrong { color: var(--red); }
+    .cmp-lbl.right  { color: var(--l1); }
+    .cmp-list { list-style: none; flex: 1; }
+    .cmp-list li {
+      padding: 0.45rem 0; font-size: 1.27rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex; align-items: center; gap: 0.45rem;
+    }
+    .cmp-list li:last-child { border-bottom: none; }
+    .cmp-arrow { font-size: 2rem; color: var(--gold); text-align: center; }
+    .hook-q {
+      text-align: center; margin-top: 1rem;
+      font-size: 1.27rem; color: var(--gold); font-style: italic;
+    }
+
+    /* ============================================================
+       SLIDE 3 — ICEBREAKER  (v3: 50 tools, smaller chips)
+       ============================================================ */
+    .tools-grid {
+      display: grid; grid-template-columns: repeat(11, 1fr);
+      gap: 0.45rem; flex: 1; align-content: start;
+    }
+    .tool-chip {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 50px; padding: 0.38rem 0.6rem;
+      text-align: center; font-size: 0.75rem; cursor: pointer;
+      transition: all 180ms; user-select: none;
+    }
+    .tool-chip:hover { border-color: rgba(255,255,255,0.28); }
+    .tool-chip.on { border-color: var(--gold); background: rgba(244,185,66,.11); color: var(--gold); }
+    .ice-note {
+      margin-top: 0.7rem; font-size: 1.27rem; color: var(--dim);
+      text-align: center; padding: 0.65rem;
+      background: var(--surface); border-radius: var(--radius);
+    }
+
+    /* ============================================================
+       SLIDE 4 — MINDSET
+       ============================================================ */
+    .mindset-list { display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
+    .mindset-block {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.1rem 1.4rem;
+      display: flex; align-items: flex-start; gap: 1rem;
+      opacity: 0; transform: translateX(-18px);
+      transition: opacity 480ms ease, transform 480ms ease;
+    }
+    .mindset-block.vis { opacity: 1; transform: translateX(0); }
+    .mindset-num {
+      font-size: 1.6rem; font-weight: 700; color: var(--gold);
+      flex-shrink: 0; line-height: 1;
+    }
+    .mindset-body strong { font-size: 1.2rem; font-weight: 700; display: block; margin-bottom: 0.2rem; }
+    .mindset-body p { font-size: 1.2rem; color: var(--dim); line-height: 1.4; }
+    .mindset-callout {
+      background: linear-gradient(135deg, rgba(139,195,74,.08), rgba(0,150,136,.08));
+      border: 1px solid rgba(139,195,74,.25); border-radius: var(--radius);
+      padding: 0.8rem 1.2rem; font-size: 1.2rem; line-height: 1.4;
+    }
+
+    /* ============================================================
+       SLIDE 5 — COURSE MAP
+       ============================================================ */
+    .layer-map { display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
+    .map-row {
+      display: flex; align-items: center; gap: 0.8rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.6rem 1.1rem;
+      cursor: pointer; transition: all 180ms; flex: 1;
+    }
+    .map-row:hover { transform: translateX(5px); border-color: rgba(255,255,255,.22); }
+    .map-row.ml1 { border-left: 3px solid var(--l1); }
+    .map-row.ml2 { border-left: 3px solid var(--l2); }
+    .map-row.ml3 { border-left: 3px solid var(--l3); }
+    .map-row.ml4 { border-left: 3px solid var(--l4); }
+    .map-row.ml5 { border-left: 3px solid var(--l5); }
+    .map-icon { font-size: 1.25rem; }
+    .map-info { flex: 1; min-width: 0; }
+    .map-title { font-size: 1.2rem; font-weight: 700; }
+    .map-sub { font-size: 0.77rem; color: var(--dim); margin-top: 0.1rem; }
+    .map-cnt {
+      font-size: 0.77rem; padding: 0.18rem 0.55rem; border-radius: 50px;
+      font-weight: 700; flex-shrink: 0;
+    }
+    .map-row.ml1 .map-cnt { background: rgba(139,195,74,.14); color: var(--l1); }
+    .map-row.ml2 .map-cnt { background: rgba(76,175,80,.14);  color: var(--l2); }
+    .map-row.ml3 .map-cnt { background: rgba(0,150,136,.14);  color: var(--l3); }
+    .map-row.ml4 .map-cnt { background: rgba(0,121,107,.14);  color: var(--l4); }
+    .map-row.ml5 .map-cnt { background: rgba(46,125,50,.14);  color: var(--l5); }
+    .map-arrow { color: var(--dim); font-size: 0.85rem; }
+    .layer-motto, .sc-title[data-img], .section-title[data-img], .qa-q[data-img] { cursor: default; text-decoration: underline dotted rgba(255,255,255,.3); }
+    #motto-tip {
+      position: fixed; z-index: 900; pointer-events: none;
+      border-radius: 10px; overflow: hidden;
+      box-shadow: 0 6px 32px rgba(0,0,0,.7);
+      border: 1px solid rgba(255,255,255,.15);
+      max-height: 90vh; overflow-y: auto; opacity: 0;
+      transition: opacity 180ms;
+    }
+    #motto-tip.vis { opacity: 1; }
+    #motto-tip.landscape { width: 800px; height: auto; }
+    #motto-tip.portrait  { width: auto; height: 800px; }
+    #motto-tip img { display: block; width: 100%; height: auto; }
+    #motto-tip.portrait img { width: auto; height: 100%; }
+
+    /* ============================================================
+       SLIDE 8 — MID POINT
+       ============================================================ */
+    .reflect-list { display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
+    .reflect-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1rem 1.3rem;
+      display: flex; gap: 0.9rem; align-items: flex-start;
+      opacity: 0; transform: translateY(12px);
+      transition: all 460ms ease;
+    }
+    .reflect-item.vis { opacity: 1; transform: translateY(0); }
+    .reflect-q { font-size: 1.4rem; flex-shrink: 0; }
+    .reflect-t { font-size: 1.27rem; line-height: 1.6; text-align: left; }
+    .poll-row { display: flex; gap: 0.55rem; flex-wrap: wrap; margin-top: 1rem; }
+    .poll-btn {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 50px; padding: 0.45rem 1.1rem; font-size: 1.27rem;
+      cursor: pointer; color: var(--text); transition: all 180ms;
+    }
+    .poll-btn:hover { border-color: var(--gold); }
+    .poll-btn.sel { background: rgba(244,185,66,.13); border-color: var(--gold); color: var(--gold); }
+
+    /* ============================================================
+       LAYER 4 WORKFLOW
+       ============================================================ */
+    .workflow-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem; margin-top: 0.75rem;
+    }
+    .wf-step {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.9rem 0.8rem;
+      text-align: center; position: relative;
+    }
+    .wf-step::after {
+      content: '→'; position: absolute;
+      right: -0.48rem; top: 50%; transform: translateY(-50%);
+      color: var(--dim); font-size: 0.85rem; z-index: 2;
+    }
+    .wf-step:last-child::after { display: none; }
+    .wf-tool { font-weight: 700; color: var(--l3); font-size: 1.27rem; margin-bottom: 0.3rem; }
+    .wf-task { font-size: 1.27rem; color: var(--dim); line-height: 1.6; }
+    .wf-label {
+      font-size: 0.77rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--dim); margin-bottom: 0.35rem;
+    }
+
+    /* ============================================================
+       SLIDE 12 — CORE INSIGHT
+       ============================================================ */
+    #slide-11 { justify-content: center; align-items: center; text-align: center; }
+    .insight-q {
+      font-size: clamp(1.5rem, 3vw, 2.05rem); font-weight: 700;
+      color: var(--gold); line-height: 1.45; margin-bottom: 2rem;
+      max-width: 1280px;
+    }
+    .insight-q .w { opacity: 0; animation: wfade .35s ease forwards; }
+    @keyframes wfade {
+      from { opacity: 0; transform: translateY(5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .takeaway-row {
+      display: flex; gap: 0.9rem; justify-content: center;
+      flex-wrap: wrap; max-width: 1720px;
+    }
+    .takeaway-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1rem 1.3rem;
+      flex: 1; min-width: 380px; max-width: 500px;
+      font-size: 1.27rem; line-height: 1.6;
+    }
+    .takeaway-num { font-size: 1.4rem; margin-bottom: 0.4rem; }
+    .closing-spirit {
+      margin-top: 1.5rem; font-size: 1.27rem; color: var(--dim);
+      font-style: italic; border-top: 1px solid var(--border);
+      white-space: nowrap; align-self: center;
+      padding-top: 1rem; max-width: 480px;
+    }
+
+    /* ============================================================
+       SLIDE 13 — DEMO
+       ============================================================ */
+    .demo-list { display: flex; flex-direction: column; gap: 0.8rem; flex: 1; justify-content: center; }
+    .demo-opt {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.1rem 1.6rem;
+      cursor: pointer; display: flex; align-items: center; gap: 1.1rem;
+      transition: all 180ms; color: var(--text); text-align: left;
+    }
+    .demo-opt:hover { border-color: var(--l3); background: rgba(0,150,136,.07); transform: translateX(5px); }
+    .demo-opt.sel { border-color: var(--l3); background: rgba(0,150,136,.11); }
+    .demo-icon { font-size: 1.7rem; }
+    .demo-info strong { display: block; font-size: 1.27rem; margin-bottom: 0.2rem; }
+    .demo-info span { font-size: 0.77rem; color: var(--dim); }
+
+    /* ============================================================
+       SLIDE 14 — Q&A
+       ============================================================ */
+    .qa-list { display: flex; flex-direction: column; gap: 0.7rem; flex: 1; }
+    .qa-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; cursor: pointer;
+    }
+    .qa-q {
+      padding: 0.85rem 1.1rem; font-weight: 700; font-size: 1.27rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .q-tag {
+      background: rgba(244,185,66,.13); color: var(--gold);
+      font-size: 0.77rem; padding: 0.18rem 0.5rem; border-radius: 50px;
+      font-weight: 700; flex-shrink: 0;
+    }
+    .qa-a { max-height: 0; overflow: hidden; transition: max-height 380ms cubic-bezier(0.4,0,0.2,1); }
+    .qa-item.open .qa-a { max-height: 200px; }
+    .qa-a-inner {
+      padding: 0.75rem 1.1rem 0.85rem; font-size: 1.27rem;
+      color: var(--dim); line-height: 1.6;
+      border-top: 1px solid var(--border);
+    }
+    .qa-a-inner strong { color: var(--text); }
+    .closing-msg {
+      margin-top: 0.9rem; text-align: center;
+      font-size: 1.27rem; color: var(--dim);
+    }
+    .closing-msg strong { color: var(--gold); display: block; margin-bottom: 0.25rem; font-size: 1.27rem; }
+
+    /* ============================================================
+       PRESENTER NOTES OVERLAY
+       ============================================================ */
+    #notes-overlay {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 15%; z-index: 500;
+      background: rgba(5,10,15,.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      display: none; flex-direction: column; padding: 0.5rem 1.5rem 0.6rem;
+      transition: background 300ms; border-top: 1px solid rgba(255,255,255,.15);
+    }
+    #notes-overlay.vis { display: flex; }
+    .notes-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.4rem; padding-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      flex-shrink: 0;
+    }
+    .notes-time { font-size: 0.78rem; color: var(--dim); }
+    .notes-close-btn {
+      background: none; border: 1px solid rgba(255,255,255,.18);
+      color: var(--text); padding: 0.3rem 0.8rem;
+      border-radius: 8px; cursor: pointer; font-size: 0.82rem;
+    }
+    .notes-body-content { font-size: 0.82rem; line-height: 1.5; color: #A0B0C0; overflow-y: auto; flex: 1; }
+
+    /* ============================================================
+       DEMO MODAL
+       ============================================================ */
+    #demo-modal {
+      position: fixed; inset: 0; z-index: 600;
+      background: rgba(0,0,0,0.82); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+    #demo-modal.vis { display: flex; }
+
+    #demo-modal-box {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      width: min(92vw, calc(88vh * 16 / 9));
+      box-shadow: 0 8px 48px rgba(0,0,0,0.65);
+      display: flex; flex-direction: column;
+    }
+    #demo-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.65rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #demo-modal-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    #demo-modal-close {
+      background: none; border: none; color: var(--dim); cursor: pointer;
+      font-size: 1.1rem; line-height: 1; padding: 0.2rem 0.5rem;
+      border-radius: 6px; transition: all 160ms; font-family: inherit;
+    }
+    #demo-modal-close:hover { background: var(--surface-hi); color: var(--text); }
+
+    #demo-modal-body { position: relative; overflow: hidden; cursor: grab; }
+    #demo-modal-body.dragging { cursor: grabbing; }
+    #demo-modal-img  { width: 100%; display: block; aspect-ratio: 16/9; object-fit: contain;
+      transform-origin: 0 0; will-change: transform; user-select: none; -webkit-user-drag: none; }
+
+    #demo-modal-ph {
+      aspect-ratio: 16/9;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 0.55rem;
+      background: var(--surface);
+    }
+    #demo-modal-ph.hidden { display: none; }
+    .ph-icon { font-size: 2.8rem; opacity: 0.35; }
+    .ph-text { font-size: 1.05rem; color: var(--dim); font-weight: 700; }
+    .ph-sub  { font-size: 0.72rem; color: var(--dim); opacity: 0.55; }
+
+    /* 輪播控制 */
+    #demo-carousel-nav {
+      display: none; align-items: center; justify-content: center;
+      gap: 0.8rem; padding: 0.45rem 0;
+      background: var(--bg); border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #demo-carousel-nav.vis { display: flex; }
+    .carousel-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--text); cursor: pointer; border-radius: 6px;
+      padding: 0.2rem 0.7rem; font-size: 1rem; line-height: 1.4;
+      transition: all 160ms; font-family: inherit;
+    }
+    .carousel-btn:hover { background: var(--surface-hi); border-color: var(--gold); }
+    .carousel-btn:disabled { opacity: 0.28; cursor: default; }
+    #demo-carousel-counter { font-size: 0.78rem; color: var(--dim); min-width: 3.5rem; text-align: center; }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 768px) {
+      .slide { padding: 1.3rem 1.2rem 5rem; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .compare-grid { grid-template-columns: 1fr; grid-template-rows: 1fr auto 1fr; }
+      .cmp-arrow { transform: rotate(90deg); }
+      .workflow-grid { grid-template-columns: repeat(2, 1fr); }
+      .takeaway-row { flex-direction: column; }
+      #kbd-hint { display: none; }
+      .title-meta { gap: 1.2rem; }
+      #top-controls { gap: 0.3rem; }
+      .ctrl-btn { padding: 0.25rem 0.5rem; font-size: 0.78rem; }
+      .fs-btn { padding: 0.25rem 0.5rem; }
+      #demo-modal { padding: 1rem; }
+    }
+    @media (max-height: 580px) {
+      .slide { padding-top: 1.2rem; }
+      .section-title { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Progress bar -->
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+
+  <!-- ── TOP-RIGHT CONTROLS ── -->
+  <div id="top-controls">
+    <!-- iPhone-style A− / A+ font size group -->
+    <div class="fs-group">
+      <button id="btn-fs-dec" class="fs-btn" onclick="changeFontSize(-1)" title="縮小字型" disabled>A−</button>
+      <div class="fs-sep"></div>
+      <button id="btn-fs-inc" class="fs-btn" onclick="changeFontSize(1)"  title="放大字型">A+</button>
+    </div>
+    <button id="btn-theme"    class="ctrl-btn" onclick="toggleTheme()"   title="切換亮色 / 暗色">☀️</button>
+    <div    id="timer-widget" class="ctrl-btn" onclick="timerClick()"     title="點擊開始 / 重設計時器">00:00</div>
+  </div>
+
+  <!-- ── HOME BUTTON (bottom-left) ── -->
+  <button id="btn-home" onclick="goToSlide(0)" title="回到首頁 (Home)" hidden>🏠</button>
+
+  <!-- Slides -->
+  <div id="slides-container">
+
+    <!-- ====================================================
+         SLIDE 1 · 標題封面
+         ==================================================== -->
+    <section class="slide" id="slide-0">
+      <div id="particles"></div>
+      <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:0.2rem;">
+        <div style="font-size:3rem;margin-bottom:0.6rem;">🤖</div>
+        <div class="title-main">AI 工具的應用</div>
+        <div class="title-sub">由淺入深．五個層次的實戰體驗</div>
+        <div class="title-meta">
+          <div class="meta-item"><span>主講</span><strong>周逸翔 領恩學習</strong></div>
+          <div class="meta-item"><span>日期</span><strong>2026年 4月 25日</strong></div>
+          <div class="meta-item"><span>時間</span><strong>13:30 — 14:50</strong></div>
+        </div>
+        <div class="title-tag">「從今天起，AI 不再只是別人的工具」</div>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE AI · AI 里程碑時間軸
+         ==================================================== -->
+    <section class="slide" id="slide-milestones">
+      <span class="slide-label">背景</span>
+      <div class="section-title">AI 里程碑時間軸</div>
+      <div class="section-sub">ChatGPT 發布至今 · 17 個關鍵節點（2022–2026）</div>
+
+      <style>
+        /* ── Fishbone Timeline ── */
+        .fb-wrap {
+          flex: 1;
+          overflow: visible;
+          margin-top: 1.5rem;
+          padding-bottom: 0.8rem;
+        }
+
+        .fb-inner {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          min-height: 320px;
+        }
+
+        /* Central axis line */
+        .fb-axis {
+          position: absolute;
+          top: 50%;
+          left: 0; right: 0;
+          height: 6px;
+          background: linear-gradient(90deg, var(--l3), var(--gold), var(--l1));
+          transform: translateY(-50%);
+          border-radius: 2px;
+          box-shadow: 0 0 8px rgba(139,195,74,0.35);
+        }
+
+        /* Year labels on axis */
+        .fb-year {
+          position: absolute;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          background: var(--bg);
+          border: 3px solid var(--border);
+          border-radius: 12px;
+          padding: 1px 6px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--dim);
+          white-space: nowrap;
+          z-index: 2;
+        }
+
+        /* Event node wrapper */
+        .fb-node {
+          position: absolute;
+          width: 128px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          cursor: default;
+          transition: width 0.1s ease;
+        }
+        .fb-node:hover {
+          width: 192px;
+        }
+        .fb-node.above {
+          /* card on top, stem points down to axis */
+          bottom: 50%;
+          flex-direction: column;
+          align-items: center;
+          transform: translateX(-50%);
+        }
+        .fb-node.below {
+          /* card below, stem points up to axis */
+          top: 50%;
+          flex-direction: column;
+          align-items: center;
+          transform: translateX(-50%);
+        }
+
+        /* Dot on axis */
+        .fb-dot {
+          width: 15px; height: 15px;
+          border-radius: 50%;
+          background: var(--gold);
+          border: 3px solid var(--bg);
+          flex-shrink: 0;
+          z-index: 3;
+          transition: transform 200ms ease, box-shadow 200ms ease;
+        }
+        .fb-node:hover .fb-dot {
+          transform: scale(1.5);
+          box-shadow: 0 0 8px var(--gold);
+        }
+
+        /* Stem line */
+        .fb-stem {
+          width: 3px;
+          flex-shrink: 0;
+          background: var(--border);
+          transition: background 200ms ease;
+        }
+        .fb-node.above .fb-stem { height: 44px; }
+        .fb-node.below .fb-stem { height: 44px; }
+        .fb-node:hover .fb-stem { background: var(--gold); }
+
+        /* Card */
+        .fb-card {
+          width: 100%;
+          border-radius: 8px;
+          border: 3px solid var(--border);
+          background: var(--surface);
+          padding: 0.6rem 0.8rem;
+          transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+          overflow: visible;
+          box-sizing: border-box;
+        }
+        .fb-node:hover .fb-card {
+          background: var(--surface-hi);
+          border-color: var(--gold);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+        }
+
+        /* Type label chip */
+        .fb-type {
+          display: inline-block;
+          font-size: 0.6rem;
+          font-weight: 700;
+          padding: 1px 5px;
+          border-radius: 4px;
+          margin-bottom: 3px;
+          letter-spacing: 0.03em;
+          white-space: nowrap;
+        }
+
+        /* Event title */
+        .fb-title {
+          font-size: 1.0rem;
+          font-weight: 700;
+          color: var(--text);
+          line-height: 1.3;
+          white-space: normal;
+          word-break: break-all;
+        }
+
+        /* Detail — hidden until hover */
+        .fb-detail {
+          font-size: 0.8rem;
+          color: var(--dim);
+          line-height: 1.4;
+          margin-top: 4px;
+          max-height: 0;
+          opacity: 0;
+          overflow: hidden;
+          transition: max-height 300ms ease, opacity 250ms ease, margin-top 200ms ease;
+          white-space: normal;
+        }
+        .fb-node:hover .fb-detail {
+          max-height: 80px;
+          opacity: 1;
+          margin-top: 4px;
+        }
+
+        /* Date label in detail */
+        .fb-date {
+          font-weight: 700;
+          color: var(--gold);
+          margin-right: 3px;
+        }
+
+        /* Light mode adjustments */
+        body.light .fb-card {
+          background: rgba(255,255,255,0.75);
+          border-color: rgba(0,0,0,0.12);
+        }
+        body.light .fb-node:hover .fb-card {
+          background: #fff;
+          border-color: var(--gold);
+        }
+        body.light .fb-title { color: #1a1a2e; }
+        body.light .fb-detail { color: #444; }
+        body.light .fb-stem { background: rgba(0,0,0,0.15); }
+        body.light .fb-node:hover .fb-stem { background: var(--gold); }
+        body.light .fb-axis { box-shadow: 0 0 8px rgba(46,125,50,0.3); }
+      </style>
+
+      <div class="fb-wrap">
+        <div class="fb-inner">
+          <div class="fb-axis"></div>
+
+          <!-- Year markers -->
+          <div class="fb-year" style="left:3%;">2022</div>
+          <div class="fb-year" style="left:12%;">2023</div>
+          <div class="fb-year" style="left:33%;">2024</div>
+          <div class="fb-year" style="left:56%;">2025</div>
+          <div class="fb-year" style="left:80%;">2026</div>
+
+          <!-- 1 · 2022.11 · above -->
+          <div class="fb-node above" style="left:3%;">
+            <div class="fb-card">
+              <span class="fb-type" style="background:#EEEDFE;color:#3C3489;">語言模型</span>
+              <div class="fb-title">ChatGPT (GPT-3.5)</div>
+              <div class="fb-detail"><span class="fb-date">2022.11</span>5 天破百萬用戶，人人可用的 AI 對話時代正式開始</div>
+            </div>
+            <div class="fb-stem"></div>
+            <div class="fb-dot"></div>
+          </div>
+
+          <!-- 2 · 2023.03 · below -->
+          <div class="fb-node below" style="left:8.8%;">
+            <div class="fb-dot"></div>
+            <div class="fb-stem"></div>
+            <div class="fb-card">
+              <span class="fb-type" style="background:#EEEDFE;color:#3C3489;">語言模型</span>
+              <div class="fb-title">GPT-4</div>
+              <div class="fb-detail"><span class="fb-date">2023.03</span>多模態＋推理大躍進，通過律師考試前 10%</div>
+            </div>
+          </div>
+
+          <!-- 3 · 2023.07 · above -->
+          <div class="fb-node above" style="left:14.6%;">
+            <div class="fb-card">
+              <span class="fb-type" style="background:#E1F5EE;color:#085041;">開源突破</span>
+              <div class="fb-title">Meta Llama 2</div>
+              <div class="fb-detail"><span class="fb-date">2023.07</span>開源可商用，下載破千萬，本地 AI 部署風潮爆發</div>
+            </div>
+            <div class="fb-stem"></div>
+            <div class="fb-dot"></div>
+          </div>
+
+          <!-- 4 · 2023.12 · below -->
+          <div class="fb-node below" style="left:20.4%;">
+            <div class="fb-dot"></div>
+            <div class="fb-stem"></div>
+            <div class="fb-card">
+              <span class="fb-type" style="background:#EEEDFE;color:#3C3489;">語言模型</span>
+              <div class="fb-title">Google Gemini 發布</div>
+              <div class="fb-detail"><span class="fb-date">2023.12</span>三版本原生多模態，AI 戰局正式多極化</div>
+            </div>
+          </div>
+
+          <!-- 5 · 2024.02 · above -->
+          <div class="fb-node above" style="left:26.2%;">
+            <div class="fb-card">
+              <span class="fb-type" style="background:#FAECE7;color:#712B13;">多模態/生成</span>
+              <div class="fb-title">OpenAI Sora 發表</div>
+              <div class="fb-detail"><span class="fb-date">2024.02</span>文字生成 60 秒高品質影片，震驚電影產業</div>
+            </div>
+            <div class="fb-stem"></div>
+            <div class="fb-dot"></div>
+          </div>
+
+          <!-- 6 · 2024.03 · below -->
+          <div class="fb-node below" style="left:32.0%;">
+            <div class="fb-dot"></div>
+            <div class="fb-stem"></div>
+            <div class="fb-card">
+              <span class="fb-type" style="background:#EEEDFE;color:#3C3489;">語言模型</span>
+              <div class="fb-title">Claude 3 Opus</div>
+              <div class="fb-detail"><span class="fb-date">2024.03</span>首個在多項基準超越 GPT-4 的競爭者</div>
+            </div>
+          </div>
+
+          <!-- 7 · 2024.05 · above -->
+          <div class="fb-node above" style="left:37.9%;">
+            <div class="fb-card">
+              <span class="fb-type" style="background:#FAECE7;color:#712B13;">多模態/生成</span>
+              <div class="fb-title">GPT-4o</div>
+              <div class="fb-detail"><span class="fb-date">2024.05</span>即時語音視覺，免費用戶也能用，232ms 超低延遲</div>
+            </div>
+            <div class="fb-stem"></div>
+            <div class="fb-dot"></div>
+          </div>
+
+          <!-- 8 · 2024.09 · below -->
+          <div class="fb-node below" style="left:43.7%;">
+            <div class="fb-dot"></div>
+            <div class="fb-stem"></div>
+            <div class="fb-card">
+              <span class="fb-type" style="background:#FAEEDA;color:#633806;">推理/效能</span>
+              <div class="fb-title">OpenAI o1 推理模型</div>
+              <div class="fb-detail"><span class="fb-date">2024.09</span>先思考再回答，博士級科學推理大幅領先</div>
+            </div>
+          </div>
+
+          <!-- 9 · 2025.01 · above -->
+          <div class="fb-node above" style="left:49.5%;">
+            <div class="fb-card">
+              <span class="fb-type" style="background:#E1F5EE;color:#085041;">開源突破</span>
+              <div class="fb-title">DeepSeek R1 開源</div>
+              <div class="fb-detail"><span class="fb-date">2025.01</span>600 萬美元媲美 o1，英偉達單日蒸發 6000 億</div>
+            </div>
+            <div class="fb-stem"></div>
+            <div class="fb-dot"></div>
+          </div>
+
+          <!-- 10 · 2025.03 · below -->
+          <div class="fb-node below" style="left:55.3%;">
+            <div class="fb-dot"></div>
+            <div class="fb-stem"></div>
+            <div class="fb-card">
+              <span class="fb-type" style="background:#FBEAF0;color:#72243E;">社群事件</span>
+              <div class="fb-title">GPT-4o 吉卜力事件</div>
+              <div class="fb-detail"><span class="fb-date">2025.03</span>1 小時百萬新用戶，「GPU are melting」</div>
+            </div>
+          </div>
+
+          <!-- 11 · 2025.05 · above -->
+          <div class="fb-node above" style="left:61.2%;">
+            <div class="fb-card">
+              <span class="fb-type" style="background:#FAEEDA;color:#633806;">推理/效能</span>
+              <div class="fb-title">GPT-5 發布</div>
+              <div class="fb-detail"><span class="fb-date">2025.05</span>整合動態思考模式，幻覺大減，前沿競賽加速</div>
+            </div>
+            <div class="fb-stem"></div>
+            <div class="fb-dot"></div>
+          </div>
+
+          <!-- 12 · 2025.12 · below · NEW -->
+          <div class="fb-node below" style="left:67.0%;">
+            <div class="fb-dot"></div>
+            <div class="fb-stem"></div>
+            <div class="fb-card">
+              <span class="fb-type" style="background:#E6F1FB;color:#0C447C;">AI Agent</span>
+              <div class="fb-title">Meta 收購 Manus AI</div>
+              <div class="fb-detail"><span class="fb-date">2025.12</span>重金買下新加坡 AI Agent 新創，科技巨頭搶進自主 Agent 賽道</div>
+            </div>
+          </div>
+
+          <!-- 13 · 2026.01 · above -->
+          <div class="fb-node above" style="left:72.8%;">
+            <div class="fb-card">
+              <span class="fb-type" style="background:#E6F1FB;color:#0C447C;">AI Agent</span>
+              <div class="fb-title">Claude Cowork 發布</div>
+              <div class="fb-detail"><span class="fb-date">2026.01</span>非工程師也能委派 AI Agent，Vibe Working 時代</div>
+            </div>
+            <div class="fb-stem"></div>
+            <div class="fb-dot"></div>
+          </div>
+
+          <!-- 14 · 2026.01–04 · below -->
+          <div class="fb-node below" style="left:78.6%;">
+            <div class="fb-dot"></div>
+            <div class="fb-stem"></div>
+            <div class="fb-card">
+              <span class="fb-type" style="background:#FBEAF0;color:#72243E;">社群事件</span>
+              <div class="fb-title">龍蝦事件 / OpenClaw</div>
+              <div class="fb-detail"><span class="fb-date">2026.01–04</span>200 美元訂閱跑出 5000 美元工作量的時代結束</div>
+            </div>
+          </div>
+
+          <!-- 15 · 2026.03.17 · above -->
+          <div class="fb-node above" style="left:84.5%;">
+            <div class="fb-card">
+              <span class="fb-type" style="background:#E6F1FB;color:#0C447C;">AI Agent</span>
+              <div class="fb-title">Claude Dispatch 發布</div>
+              <div class="fb-detail"><span class="fb-date">2026.03.17</span>手機遠端叫 AI 在電腦做事，離螢幕也能工作</div>
+            </div>
+            <div class="fb-stem"></div>
+            <div class="fb-dot"></div>
+          </div>
+
+          <!-- 16 · 2026.03.24 · below -->
+          <div class="fb-node below" style="left:90.3%;">
+            <div class="fb-dot"></div>
+            <div class="fb-stem"></div>
+            <div class="fb-card">
+              <span class="fb-type" style="background:#F1EFE8;color:#444441;">產品終結</span>
+              <div class="fb-title">OpenAI Sora 宣告關閉</div>
+              <div class="fb-detail"><span class="fb-date">2026.03.24</span>每日燒百萬算力、Disney 協議告吹，App 4/26 關閉</div>
+            </div>
+          </div>
+
+          <!-- 17 · 2026.04.21 · above · NEW -->
+          <div class="fb-node above" style="left:96.0%;">
+            <div class="fb-card">
+              <span class="fb-type" style="background:#FAECE7;color:#712B13;">多模態/生成</span>
+              <div class="fb-title">ChatGPT 圖像 2.0</div>
+              <div class="fb-detail"><span class="fb-date">2026.04.21</span>圖像生成大進化，精準文字渲染、風格一致性，原生整合對話流</div>
+            </div>
+            <div class="fb-stem"></div>
+            <div class="fb-dot"></div>
+          </div>
+
+        </div><!-- /fb-inner -->
+      </div><!-- /fb-wrap -->
+    </section>
+
+    <!-- ====================================================
+         SLIDE 2 · 開場破除迷思
+         ==================================================== -->
+    <section class="slide" id="slide-1">
+      <span class="slide-label">開場</span>
+      <div class="section-title">AI 跟你想的不一樣</div>
+      <div class="section-sub">讓我們先破除幾個迷思，再開始</div>
+      <div class="compare-grid" style="flex:1;">
+        <div class="cmp-col wrong">
+          <div class="cmp-lbl wrong">❌ 你以為的 AI</div>
+          <ul class="cmp-list">
+            <li>⚙️ 要懂程式才能用</li>
+            <li>💸 很貴，有高門檻</li>
+            <li>🤖 只有工程師在用</li>
+            <li>🏭 大公司的專屬工具</li>
+            <li>📚 需要長時間學習</li>
+          </ul>
+        </div>
+        <div class="cmp-arrow">→</div>
+        <div class="cmp-col right">
+          <div class="cmp-lbl right">✅ 真實的 AI</div>
+          <ul class="cmp-list">
+            <li>💬 用說話、打字就好</li>
+            <li>🆓 大多數功能完全免費</li>
+            <li>👨‍👩‍👧 任何人都能立刻上手</li>
+            <li>📱 手機、電腦都能用</li>
+            <li>⚡ 今天就能開始</li>
+          </ul>
+        </div>
+      </div>
+      <div class="hook-q">「今天你不需要懂技術，只需要懂你自己的需求」</div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 3 · 破冰互動 (v3: 50 AI tools)
+         ==================================================== -->
+    <section class="slide" id="slide-2">
+      <span class="slide-label">破冰</span>
+      <div class="section-title">你用過哪些 AI 工具？</div>
+      <div class="section-sub">點擊用過的— 讓我們先看看大家的起點</div>
+      <div class="tools-grid">
+        <!-- 對話型 AI -->
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🤖 ChatGPT</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">✨ Gemini</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🧠 Claude</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🔍 Copilot</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">👥 Meta AI</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">⚡ Grok</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🔎 Perplexity</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🐋 DeepSeek</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">💭 Character.AI</div>
+        <!-- 圖像生成 -->
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🖼️ Midjourney</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎨 DALL-E 3</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🌊 Stable Diffusion</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🔥 Adobe Firefly</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">💡 Ideogram</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🦁 Leonardo AI</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🌀 Flux</div>
+        <!-- 影片生成 -->
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎬 Runway ML</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎥 Sora</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎞️ Kling AI</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎦 Pika</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">💫 Luma AI</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🙋 HeyGen</div>
+        <!-- 音樂/音效 -->
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎵 Suno</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎙️ ElevenLabs</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎶 Udio</div>
+        <!-- 程式開發 -->
+        <div class="tool-chip" onclick="this.classList.toggle('on')">💻 GitHub Copilot</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">⌨️ Cursor</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">⚡ Bolt.new</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">❤️ Lovable</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🔲 v0</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🔧 Replit AI</div>
+        <!-- 生產力工具 -->
+        <div class="tool-chip" onclick="this.classList.toggle('on')">📓 NotebookLM</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎨 Canva AI</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">📋 Notion AI</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">📊 Gamma AI</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">✂️ CapCut AI</div>
+        <!-- 語音助理 -->
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎵 Siri</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🗣️ Google 助理</div>
+        <!-- 其他工具 -->
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🌍 DeepL</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">✍️ Grammarly</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🎭 Synthesia</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">💬 LINE AI</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">🤗 Hugging Face</div>
+        <div class="tool-chip" onclick="this.classList.toggle('on')">⚡ Groq</div>
+      </div>
+      <div class="ice-note">無論你用過幾個，接下來 80 分鐘都一定有收穫 ✨</div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 4 · 心態轉換
+         ==================================================== -->
+    <section class="slide" id="slide-3">
+      <span class="slide-label">心態</span>
+      <div class="section-title">三個正確心態，決定你的收穫</div>
+      <div class="section-sub">同樣的工具，不同的心態，效果天差地遠</div>
+      <div class="mindset-list" id="mindset-blocks">
+        <div class="mindset-block" data-d="0">
+          <div class="mindset-num">01</div>
+          <div class="mindset-body">
+            <strong>AI 是「超強助理」，不是「能完整替代你的機器人」</strong>
+            <p>它幫你加速完成任務，你負責判斷方向與把關品質。就像有個不眠不休的助手，但你仍是主人。</p>
+          </div>
+        </div>
+        <div class="mindset-block" data-d="3000">
+          <div class="mindset-num">02</div>
+          <div class="mindset-body">
+            <strong>它需要你給清楚方向，就像帶徒弟</strong>
+            <p>「幫我改這封信」和「把這封信改正式口吻，對象是廠商，強調我們的立場」——效果差很大。</p>
+          </div>
+        </div>
+        <div class="mindset-block" data-d="6000">
+          <div class="mindset-num">03</div>
+          <div class="mindset-body">
+            <strong>越早開始越有優勢，不要等到「準備好」</strong>
+            <p>邊用邊學才是正確姿勢。AI 工具每個月都在進步，現在開始永遠不嫌晚，但再等就真的晚了。</p>
+          </div>
+        </div>
+        <div class="mindset-block" data-d="9000">
+          <div class="mindset-num">💡</div>
+          <div class="mindset-body">
+            <strong>道親的優勢：道場有很多可以試驗的情境——這正是提升學會 AI 的機會。</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 5 · 課程地圖
+         ==================================================== -->
+    <section class="slide" id="slide-4">
+      <span class="slide-label">課程地圖</span>
+      <div class="section-title">AI 乾坤：從精益求精到言出法隨的五重境界</div>
+      <div class="section-sub">找到你現在站的位置，從那裡出發...｜<span class="layer-motto" data-img="Demo/「最終成為巨嬰」.jpg">最終成為巨嬰</span></div>
+      <div class="layer-map">
+        <div class="map-row ml1" onclick="goToSlide(5)">
+          <div class="map-icon">🌱</div>
+          <div class="map-info">
+            <div class="map-title">Layer 1｜零門檻，立即可用｜<span class="layer-motto" data-img="Demo/「精益求精」.png">「精益求精」</span></div>
+            <div class="map-sub">Email 潤飾 / LINE 道務通知 / 貼文生成 / 健康記錄整理</div>
+          </div>
+          <div class="map-cnt">4 個情境</div>
+          <div class="map-arrow">›</div>
+        </div>
+        <div class="map-row ml2" onclick="goToSlide(6)">
+          <div class="map-icon">🌿</div>
+          <div class="map-info">
+            <div class="map-title">Layer 2｜稍加嘗試，效益明顯｜<span class="layer-motto" data-img="Demo/「意在筆先」.png">「意在筆先」</span></div>
+            <div class="map-sub">證件照 / 活動海報 / 旅遊地圖 / 財務分析報告</div>
+          </div>
+          <div class="map-cnt">4 個情境</div>
+          <div class="map-arrow">›</div>
+        </div>
+        <div class="map-row ml3" onclick="goToSlide(8)">
+          <div class="map-icon">🌳</div>
+          <div class="map-info">
+            <div class="map-title">Layer 3｜需要規劃，產出更完整｜<span class="layer-motto" data-img="Demo/「去蕪存菁」.png">「去蕪存菁」</span></div>
+            <div class="map-sub">NotebookLM 備課 / 講義審查 / 知識庫 / 活動設計</div>
+          </div>
+          <div class="map-cnt">4 個情境</div>
+          <div class="map-arrow">›</div>
+        </div>
+        <div class="map-row ml4" onclick="goToSlide(9)">
+          <div class="map-icon">🎬</div>
+          <div class="map-info">
+            <div class="map-title">Layer 4｜跨工具整合，專業製作｜<span class="layer-motto" data-img="Demo/「賦予生命」.png">「賦予生命」</span></div>
+            <div class="map-sub">Prompt 工程 / 社青班宣傳動畫完整製作流程</div>
+          </div>
+          <div class="map-cnt">2 個情境</div>
+          <div class="map-arrow">›</div>
+        </div>
+        <div class="map-row ml5" onclick="goToSlide(10)">
+          <div class="map-icon">⚙️</div>
+          <div class="map-info">
+            <div class="map-title">Layer 5｜技術深度，職業級應用｜<span class="layer-motto" data-img="Demo/「言出法隨」.png">「言出法隨」</span></div>
+            <div class="map-sub">CAD 自動化工程估算 / Excel 資料分析邏輯設計</div>
+          </div>
+          <div class="map-cnt">2 個情境</div>
+          <div class="map-arrow">›</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 6 · Layer 1
+         ==================================================== -->
+    <section class="slide tint-l1" id="slide-5">
+      <span class="slide-label">Layer 1</span>
+      <div>
+        <span class="layer-badge badge-l1" data-img="Demo/「精益求精」.png">🌱 Layer 1 — 零門檻，立即可用</span>
+        <div class="section-title" data-img="Demo/「只要會打字，今天就能開始」.png">只要會打字，今天就能開始</div>
+        <div class="section-sub">這 4 個場景，下課後回家就能試</div>
+      </div>
+      <div class="cards-grid" id="cards-l1"></div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 7 · Layer 2
+         ==================================================== -->
+    <section class="slide tint-l2" id="slide-6">
+      <span class="slide-label">Layer 2</span>
+      <div>
+        <span class="layer-badge badge-l2" data-img="Demo/「意在筆先」.png">🌿 Layer 2 — 稍加嘗試，效益明顯</span>
+        <div class="section-title" data-img="Demo/AI工具應用08.png">花一點時間摸索，一旦上手就停不下來</div>
+        <div class="section-sub">需要 10–20 分鐘學習，效果很值得</div>
+      </div>
+      <div class="cards-grid" id="cards-l2"></div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 8 · 中場反思
+         ==================================================== -->
+    <section class="slide" id="slide-7">
+      <span class="slide-label">中場</span>
+      <div class="section-title" data-img="Demo/AI工具應用09.png">⏸ 休息一下，想一想</div>
+      <div class="section-sub">分享你的第一反應</div>
+      <div class="reflect-list" id="reflect-items">
+        <div class="reflect-item" data-d="0">
+          <div class="reflect-q">💭</div>
+          <div class="reflect-t">你剛剛看到的 8 個場景，哪一個最讓你心動？</div>
+        </div>
+        <div class="reflect-item" data-d="180">
+          <div class="reflect-q">⏰</div>
+          <div class="reflect-t">你在工作或道務中，最花時間的重複性任務是什麼？</div>
+        </div>
+        <div class="reflect-item" data-d="360">
+          <div class="reflect-q">🎯</div>
+          <div class="reflect-t">如果 AI 能幫你省下那個時間，你會用來做什麼？</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.55rem;">我最想先試試：</div>
+        <div class="poll-row">
+          <button class="poll-btn" onclick="this.classList.toggle('sel')">✉️ Email</button>
+          <button class="poll-btn" onclick="this.classList.toggle('sel')">💬 LINE 通知</button>
+          <button class="poll-btn" onclick="this.classList.toggle('sel')">📢 社群貼文</button>
+          <button class="poll-btn" onclick="this.classList.toggle('sel')">📸 證件照</button>
+          <button class="poll-btn" onclick="this.classList.toggle('sel')">🎨 活動海報</button>
+          <button class="poll-btn" onclick="this.classList.toggle('sel')">🤔 還在想</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 9 · Layer 3
+         ==================================================== -->
+    <section class="slide tint-l3" id="slide-8">
+      <span class="slide-label">Layer 3</span>
+      <div>
+        <span class="layer-badge badge-l3" data-img="Demo/「去蕪存菁」.png">🌳 Layer 3 — 需要規劃，產出更完整</span>
+        <div class="section-title" data-img="Demo/AI工具應用10.png">前置準備後，產出的價值大幅提升</div>
+        <div class="section-sub">⭐ 對講師、幹部效益最高 — 最推薦現場示範的一層</div>
+      </div>
+      <div class="cards-grid" id="cards-l3"></div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 10 · Layer 4
+         ==================================================== -->
+    <section class="slide tint-l4" id="slide-9">
+      <span class="slide-label">Layer 4</span>
+      <div>
+        <span class="layer-badge badge-l4" data-img="Demo/「賦予生命」.png">🎬 Layer 4 — 跨工具整合，專業製作</span>
+        <div class="section-title">串接多個工具，完成專業級成果</div>
+        <div class="section-sub">掌握多工具特性，打造一條完整的製作鏈</div>
+      </div>
+      <div class="cards-grid" id="cards-l4"></div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 11 · Layer 5
+         ==================================================== -->
+    <section class="slide tint-l5" id="slide-10">
+      <span class="slide-label">Layer 5</span>
+      <div>
+        <span class="layer-badge badge-l5" data-img="Demo/「言出法隨」.png">⚙️ Layer 5 — 技術深度，職業級應用</span>
+        <div class="section-title" data-img="Demo/「你的職業技能 × AI = 獨特競爭力」.png">你的職業技能 × AI = 獨特競爭力</div>
+        <div class="section-sub">AI 在這裡是加速器，你的判斷力才是核心——需要具備專業背景來驗證輸出</div>
+      </div>
+      <div class="cards-grid" id="cards-l5"></div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 12 · 核心洞見
+         ==================================================== -->
+    <section class="slide" id="slide-11">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:0.5rem;">
+        <div style="font-size:0.78rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">
+          今天最重要的一件事
+        </div>
+        <div class="insight-q" id="insight-quote"></div>
+        <div class="takeaway-row">
+          <div class="takeaway-card">
+            <div class="takeaway-num">1️⃣</div>
+            從 Layer 1 開始<br>今天下課就試一件事
+          </div>
+          <div class="takeaway-card">
+            <div class="takeaway-num">2️⃣</div>
+            不要等「準備好」<br>邊用邊學才是正確姿勢
+          </div>
+          <div class="takeaway-card">
+            <div class="takeaway-num">3️⃣</div>
+            AI 是工具<br>你的判斷力才是核心
+          </div>
+        </div>
+        <div class="closing-spirit">
+          就像修辦道一樣：不是懂了才去做，而是做了才開始慢慢懂。
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 13 · 現場示範
+         ==================================================== -->
+    <section class="slide" id="slide-12">
+      <span class="slide-label">示範</span>
+      <div class="section-title">🖥️ 現場示範時間</div>
+      <div class="section-sub">選一個，一起動手試試看</div>
+      <div class="demo-list">
+        <button class="demo-opt" onclick="selectDemo(this)">
+          <span class="demo-icon">💬</span>
+          <div class="demo-info">
+            <strong>Demo A：LINE 道務通知優化</strong>
+            <span>貼上一段公告草稿，30 秒見到差異</span>
+          </div>
+        </button>
+        <button class="demo-opt" onclick="selectDemo(this)">
+          <span class="demo-icon">📢</span>
+          <div class="demo-info">
+            <strong>Demo B：社群活動貼文生成</strong>
+            <span>說主題、說風格，60 秒生成三種版本</span>
+          </div>
+        </button>
+        <button class="demo-opt" onclick="selectDemo(this)">
+          <span class="demo-icon">🎨</span>
+          <div class="demo-info">
+            <strong>Demo C：活動海報 Prompt 生成</strong>
+            <span>用 Gemini 現場生成道場活動海報圖像</span>
+          </div>
+        </button>
+      </div>
+      <div style="margin-top:.9rem;text-align:center;font-size:.78rem;color:var(--dim);">
+        以上皆可使用免費版工具完成
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SLIDE 14 · Q&A
+         ==================================================== -->
+    <section class="slide" id="slide-13">
+      <span class="slide-label">Q&A</span>
+      <div class="section-title">你的問題，就是最好的學習</div>
+      <div class="section-sub">幾個常見問題，先回答你</div>
+      <div class="qa-list">
+        <div class="qa-item" onclick="this.classList.toggle('open')">
+          <div class="qa-q"><span class="q-tag">Q1</span>AI 說的資訊準確嗎？我能完全相信它嗎？</div>
+          <div class="qa-a"><div class="qa-a-inner">
+            AI 有時會「編造」聽起來合理但不正確的資訊，這叫做「幻覺」現象。<br>
+            使用原則：<strong>AI 負責起草、整理、加速，你負責最終把關。</strong><br>
+            重要決策（醫療、法律、財務）務必再查核或諮詢專業人士。
+          </div></div>
+        </div>
+        <div class="qa-item" onclick="this.classList.toggle('open')">
+          <div class="qa-q" data-img="Demo/「免費版夠用嗎？需要花錢才有好效果？」.png"><span class="q-tag">Q2</span>免費版夠用嗎？需要花錢才有好效果？</div>
+          <div class="qa-a"><div class="qa-a-inner">
+            Layer 1–3 的所有情境，<strong>免費版 ChatGPT / Claude / Gemini 完全夠用。</strong><br>
+            Layer 4–5 的複雜任務偶爾需要付費版（約 NT$600/月），建議先用免費版確認有需求再升級。
+          </div></div>
+        </div>
+        <div class="qa-item" onclick="this.classList.toggle('open')">
+          <div class="qa-q"><span class="q-tag">Q3</span>會不會洩漏個資？安全嗎？</div>
+          <div class="qa-a"><div class="qa-a-inner">
+            原則：<strong>避免輸入真實姓名、身分證字號、帳號密碼等敏感資訊。</strong><br>
+            道務公告、Email 草稿、活動規劃等一般內容可放心使用。工作機密文件建議選用有企業隱私保障的方案。
+          </div></div>
+        </div>
+        <div class="qa-item" onclick="this.classList.toggle('open')">
+          <div class="qa-q"><span class="q-tag">Q4</span>我都用中文，AI 的繁體中文夠好嗎？</div>
+          <div class="qa-a"><div class="qa-a-inner">
+            <strong>Claude 和 ChatGPT 的繁體中文能力都非常優秀，</strong>語感自然、道義用語也能理解。<br>
+            Gemini 中文亦佳，且整合 Google 搜尋，適合需要查閱最新資訊的任務。
+          </div></div>
+        </div>
+      </div>
+      <div class="closing-msg">
+        <strong>感恩天恩師德｜願道務宏展 🙏</strong>
+        課後如有任何問題，歡迎繼續交流
+      </div>
+    </section>
+
+  </div><!-- end slides-container -->
+
+  <!-- Navigation bar -->
+  <nav id="slide-nav">
+    <button class="nav-btn" id="btn-prev" onclick="navigatePrev()" title="上一頁 (←)">‹</button>
+    <div id="dot-indicators"></div>
+    <span id="slide-counter">1 / 15</span>
+    <button class="nav-btn" id="btn-next" onclick="navigateNext()" title="下一頁 (→)">›</button>
+  </nav>
+
+  <!-- Keyboard hint -->
+  <div id="kbd-hint">
+    ← → 換頁 &nbsp;|&nbsp; Space 下一頁<br>
+    N 講師備註 &nbsp;|&nbsp; F 全螢幕<br>
+    1–5 跳到各層
+  </div>
+
+  <!-- Presenter Notes Overlay -->
+  <div id="notes-overlay">
+    <div class="notes-top">
+      <div class="notes-time" id="notes-timing">課前播放</div>
+      <button class="notes-close-btn" onclick="toggleNotes()">關閉 (N)</button>
+    </div>
+    <div class="notes-body-content" id="notes-body"></div>
+  </div>
+
+  <!-- DEMO MODAL (v4 新增) -->
+  <div id="demo-modal" onclick="closeDemoModal()">
+    <div id="demo-modal-box" onclick="event.stopPropagation()">
+      <div id="demo-modal-header">
+        <span id="demo-modal-title">Demo</span>
+        <button id="demo-modal-close" onclick="closeDemoModal()">✕</button>
+      </div>
+      <div id="demo-modal-body">
+        <img id="demo-modal-img" src="" alt="Demo 圖片">
+        <video id="demo-modal-video" controls style="display:none;width:100%;max-height:70vh;background:#000;"></video>
+        <div id="demo-modal-ph">
+          <div class="ph-icon">🖼</div>
+          <div class="ph-text">稍後將載入</div>
+          <div class="ph-sub" id="demo-modal-ph-sub"></div>
+        </div>
+      </div>
+      <div id="demo-carousel-nav">
+        <button class="carousel-btn" id="demo-prev" onclick="carouselStep(-1)">&#8592;</button>
+        <span id="demo-carousel-counter">1 / 1</span>
+        <button class="carousel-btn" id="demo-next" onclick="carouselStep(1)">&#8594;</button>
+      </div>
+    </div>
+  </div>
+
+<div id="motto-tip"><img id="motto-tip-img" src="" alt=""></div>
+</div><!-- end app -->
+
+<script>
+/* ============================================================
+   SCENARIOS DATA
+   ============================================================ */
+const SCENARIOS = [
+  { id:1, layer:1, emoji:'✉️', titleImg:'Demo/「Email 回覆潤飾」.png',
+    title:'Email 回覆潤飾', tools:'ChatGPT、Gemini',
+    desc:'將已寫好的 Email 草稿貼給 AI，請它針對語氣、措辭、結構進行潤飾。特別適用於需要正式回覆的對外信件，例如廠商往來、業主溝通、官方函文。',
+    usage:'貼上草稿 → 說明對象與場合 → 請 AI 潤飾語氣',
+    note:'tip', noteText:'範例指令：「請把這封信改成對廠商的正式回信，語氣要禮貌但有立場」',
+    savings:'省下 10–20 分鐘 / 封' },
+  { id:2, layer:1, emoji:'💬', titleImg:'Demo/「LINE 道務通知優化」.png',
+    title:'LINE 道務通知優化', tools:'ChatGPT、Gemini、Claude',
+    desc:'將道務公告初稿貼給 AI，確認資訊是否完整（時間、地點、對象、注意事項）、語氣是否一致、有無錯別字。可進一步建立固定的公告格式模板，日後只需更換關鍵資訊。',
+    usage:'貼上初稿 → 請 AI 檢查完整性與語氣 → 建立固定模板',
+    note:'tip', noteText:'範例指令：「這是社青班的活動通知，請確認資訊完整，並讓語氣更清楚友善」',
+    savings:'每次節省約 15 分鐘' },
+  { id:3, layer:1, emoji:'📢', titleImg:'Demo/「社群小編貼文生成」.png',
+    title:'社群小編貼文生成', tools:'ChatGPT、Gemini、Claude',
+    desc:'輸入活動主題、目標受眾、發文平台，請 AI 生成第一版貼文文案。可同時生成多種風格（正式感謝型、輕鬆活潑型、故事敘述型），再由人工挑選最合適的版本做最後修改。',
+    usage:'說明主題與對象 → 指定風格 → 挑選版本修改',
+    note:'tip', noteText:'範例指令：「幫我為4/25的AI工具課程，生成3種不同風格的FB招生貼文」',
+    savings:'從 30 分鐘縮短到 5 分鐘' },
+  { id:4, layer:1, emoji:'🏥', titleImg:'Demo/「健康狀況初步整理」.png',
+    title:'健康狀況初步整理', tools:'ChatGPT、Gemini',
+    desc:'將近期身體狀況用口語描述給 AI，請它整理成結構化的觀察記錄（症狀名稱、發生頻率、可能誘發因素），就醫時直接出示，讓醫師快速掌握狀況，大幅提升問診效率。',
+    usage:'描述症狀 → 請 AI 整理記錄 → 就醫前備用',
+    note:'warn', noteText:'AI 提供參考方向，無法取代醫師診斷，重要症狀務必就醫' },
+  { id:5, layer:2, emoji:'📸', titleImg:'Demo/「生活照轉專業證件照」.png',
+    title:'生活照轉專業證件照', tools:'Gemini',
+    desc:'使用 Gemini 的圖像生成功能，上傳一張日常生活照，再用文字描述需要的風格（白底、正式西裝、柔和燈光、半身照），即可生成接近攝影棚水準的證件照。',
+    usage:'上傳照片 → 描述想要的風格與背景 → 生成下載',
+    note:'tip', noteText:'適用：履歷用照、道場幹部識別名冊、LINE 大頭貼，免去攝影棚費用與時間',
+    savings:'省下 NT$500–2,000 拍攝費用' },
+  { id:6, layer:2, emoji:'🎨',
+    title:'各種風格活動海報／背板', tools:'ChatGPT (DALL-E)、Gemini (Nano Banana)、Canva AI',
+    desc:'輸入活動主題、舉辦時間地點、目標受眾、想要的視覺風格，讓 AI 生成海報視覺設計概念或完整圖像，再搭配 Canva 加入正確的文字資訊與細節調整。',
+    usage:'描述主題與風格 → 生成圖像 → Canva 加入文字',
+    note:'tip', noteText:'Prompt 範例：「台灣廟宇風格，暖色調，一棵大樹下有道親研讀，用於法會招生海報」' },
+  { id:7, layer:2, emoji:'🗺️', titleImg:'Demo/「旅行插畫導覽地圖」.png',
+    title:'旅行插畫導覽地圖', tools:'Gemini (Nano Banana)、NotebookLM',
+    desc:'將旅遊行前說明的 PDF（景點清單、交通路線、住宿資訊）上傳給 AI，請它生成一張插畫風格的一頁式旅遊導覽地圖，標示主要景點位置、移動路線、貼心小提示。',
+    usage:'上傳 PDF → 指定插畫風格 → 生成一頁式導覽地圖',
+    note:'tip', noteText:'適合道場旅遊活動、班門出遊，可作為給參與者的精美旅遊手冊' },
+  { id:8, layer:2, emoji:'📊', titleImg:'Demo/「財務規劃自動分析報告」.png',
+    title:'財務規劃自動分析報告', tools:'ChatGPT、Gemini',
+    desc:'使用 Gemini 建立定期自動生成的個人理財報告，深入解析金融商品原理（槓桿型 ETF 耗損、選擇權時間價值等），讓自己在與理財顧問對話前，已具備基本判斷力。',
+    usage:'輸入持倉資訊 → 設定定期報告格式 → 自動生成分析',
+    note:'warn', noteText:'AI 提供參考分析，不構成投資建議，重要決策請諮詢專業顧問' },
+  { id:9, layer:3, emoji:'📓', titleImg:'Demo/「NotebookLM 建立課程簡報」.png',
+    title:'NotebookLM 建立課程簡報', tools:'NotebookLM（Google）',
+    desc:'將課程相關資料（書籍章節、道場講義、網路文章、YouTube 影片逐字稿）一次性上傳至 NotebookLM，讓 AI 自動分析並生成結構清晰的課程大綱與重點摘要，再製作成投影片。',
+    usage:'上傳多份資料 → AI 分析彙整 → 生成大綱與簡報',
+    note:'tip', noteText:'相較傳統備課方式（逐本閱讀、手動整理筆記），節省 60% 以上的備課時間',
+    savings:'備課時間省下 60%+' },
+  { id:10, layer:3, emoji:'🔍', titleImg:'Demo/「PDF 講義品質檢查」.png',
+    title:'PDF 講義品質檢查', tools:'NotebookLM（Google）、Claude',
+    desc:'將課程講義的 PDF 上傳給 AI，請它逐段掃描全文，標出疑似錯別字、語意不通順的段落、前後不一致的用詞、格式排版問題。AI 作為客觀的「第二雙眼睛」。',
+    usage:'上傳 PDF → 請 AI 掃描全文 → 逐一確認修正建議',
+    note:'tip', noteText:'講師對講義過於熟悉，反而容易看漏錯誤。AI 能在正式印製前有效補位' },
+  { id:11, layer:3, emoji:'📚', titleImg:'Demo/「多來源知識庫彙整」.png',
+    title:'多來源知識庫彙整', tools:'NotebookLM、Claude',
+    desc:'將某一主題領域（如一貫道五教教義比較、AI 工具最新發展）的學習資源——PDF、YouTube 影片、網頁文章——匯入 AI 工具，建立結構化的知識索引，可持續查詢與擴充。',
+    usage:'整理資料來源 → 匯入工具 → 建立可查詢的知識系統',
+    note:'tip', noteText:'形成一個個人化、可隨時調用的專業知識系統。前人可用此建立道義問答庫' },
+  { id:12, layer:3, emoji:'🎪',
+    title:'課程體驗與活動設計', tools:'ChatGPT、Gemini、Claude',
+    desc:'用 AI 構思具啟發性的互動教學情境、設計體驗活動的流程與引導問題，將傳統道義融入現代學員容易接受的體驗形式。AI 是靈感激發者與初稿產生器。',
+    usage:'說明課程主題與對象 → 請 AI 設計活動流程 → 人工調整',
+    note:'tip', noteText:'範例指令：「設計適合25-45歲道親、30分鐘的破冰活動，要有趣但不失莊重」' },
+  { id:13, layer:4, emoji:'🖼️', titleImg:'Demo/「AI 圖像生成與 Prompt 工程」.png',
+    title:'AI 圖像生成與 Prompt 工程', tools:'ChatGPT (DALL-E)、Gemini (Nano Banana)、NotebookLM',
+    desc:'掌握撰寫高品質圖像生成提示詞（Prompt）的核心技術，包含鏡頭焦距、光影方向、畫面構圖、圖像風格，進一步應用於動畫分鏡設計，讓圖像生成結果高度可控。',
+    usage:'學習 Prompt 語法 → 描述構圖與風格 → 反覆調整優化',
+    note:'tip', noteText:'範例：「85mm 人像鏡頭，逆光，黃金時刻，吉卜力動漫風格，三分法構圖」' },
+  { id:14, layer:4, emoji:'🎬', titleImg:'Demo/「社青班招生宣傳動畫」.png',
+    title:'社青班招生宣傳動畫', tools:'ChatGPT + Gemini + Grok + Suno',
+    desc:'整合四個 AI 工具完成完整動畫製作流水線：ChatGPT 寫腳本與分鏡 → Gemini 生成圖像素材 → Grok 轉換動態影片 → Suno 生成配樂。過去需要一個專業製作團隊，現在一個人就能完成。',
+    usage:'寫腳本 → 生圖 → 轉影片 → 配樂 → 完成 60 秒宣傳片',
+    note:'tip', noteText:'整個製作成本幾乎為零，過去需要數萬元的製作費',
+    savings:'成本從數萬元降至幾乎為零',
+    extra:`<div style="margin-top:.7rem;">
+      <div class="wf-label">四步驟製作流程</div>
+      <div class="workflow-grid">
+        <div class="wf-step"><div class="wf-tool">ChatGPT</div><div class="wf-task">撰寫腳本<br>& 分鏡表</div></div>
+        <div class="wf-step"><div class="wf-tool">Gemini</div><div class="wf-task">逐格生成<br>角色與場景圖</div></div>
+        <div class="wf-step"><div class="wf-tool">Grok</div><div class="wf-task">靜態圖片<br>轉動態影片</div></div>
+        <div class="wf-step"><div class="wf-tool">Suno</div><div class="wf-task">生成背景<br>配樂與音效</div></div>
+      </div>
+    </div>` },
+  { id:'15a', layer:5, emoji:'📐',
+    title:'CAD 輔助繪圖自動化', tools:'ChatGPT',
+    desc:'使用 ChatGPT 撰寫 AutoLISP 程式碼，實現 AutoCAD 繪圖流程的自動化。應用包含：從圖面自動讀取並統計管線長度、設備數量、材料規格，生成結構化的數量統計表。',
+    usage:'描述需自動化的工程流程 → 請 AI 生成 AutoLISP 程式碼 → 驗證調整 → 部署',
+    note:'tip', noteText:'適用對象：有工程、建築、土木背景的道親。需具備 AutoLISP 基礎知識進行驗證' },
+  { id:'15b', layer:5, emoji:'📋',
+    title:'Excel 資料分析邏輯設計', tools:'ChatGPT、Claude',
+    desc:'請 AI 協助設計 Excel 樞紐分析表的欄位配置與資料整併邏輯，建立適合工程數量統計的表格架構，並協助處理原始資料的清洗問題（欄位格式不一致、重複資料等）。',
+    usage:'描述資料結構與統計需求 → 請 AI 設計表格邏輯 → 套用驗證',
+    note:'tip', noteText:'適用對象：行政、財務、業務管理等需要大量 Excel 處理的道親' }
+];
+
+/* ============================================================
+   PRESENTER NOTES
+   ============================================================ */
+const NOTES = [
+  { title:'標題封面', timing:'課前播放（設定為待機畫面）',
+    points:['確認投影機已連接正常，解析度選 1920×1080','麥克風音量測試','室內光線稍暗，投影效果更佳','準備水杯，這是 80 分鐘的課'] },
+  { title:'AI 發展里程碑', timing:'選用（背景補充，可跳過）',
+    points:['這頁是選用背景頁，時間緊可直接跳過','適合用於「為什麼現在學 AI？」的鋪墊','可請學員找找哪個工具他們認得','指向 2022–2023 爆發期，說明普及速度之快'] },
+  { title:'開場破除迷思', timing:'0:00–2:00（2 分鐘）',
+    points:['直接開場，不要太多自我介紹','問現場：「有多少人覺得 AI 很難用？」讓他們舉手','引用自身經驗：「我第一次用 ChatGPT 也以為要懂程式...」','目標：讓所有人感覺 AI 跟自己有關係'] },
+  { title:'破冰互動', timing:'2:00–5:00（3 分鐘）',
+    points:['讓學員舉手或口頭表達','問「有人用過 Suno 或 Grok 嗎？」通常很少 → 好接「今天你會認識它」','如果大多數人只用過 ChatGPT → Layer 1–2 要多花時間','如果有人用過 NotebookLM → 邀請他們稍後分享'] },
+  { title:'三個正確心態', timing:'5:00–10:00（5 分鐘）',
+    points:['「帶徒弟」這個比喻對道場學員特別有共鳴','強調「你的判斷力才是核心」— 讓學員感到被賦能','道親優勢那段要念出來，讓他們感到驕傲','動畫是自動的，等三個 block 全出現後再繼續講'] },
+  { title:'課程地圖', timing:'10:00–12:00（2 分鐘）',
+    points:['潤飾：精益求精 (起)','繪圖：意在筆先 (承)','彙整：去蕪存菁 (轉)','影音：賦予生命 (進)','代理：言出法隨 (合)'] },
+  { title:'Layer 1 — 零門檻', timing:'12:00–24:00（12 分鐘，每卡約 3 分鐘）',
+    points:['點擊卡片展開詳細說明','⭐ 重點示範：LINE 通知優化（現場最多人有感）','問「有在幫道場管理 LINE 群組的請舉手」','如有時間，讓學員現場打一段公告草稿，一起貼給 AI'] },
+  { title:'Layer 2 — 稍加嘗試', timing:'24:00–36:00（12 分鐘）',
+    points:['證件照（場景5）是最容易製造驚喜的 Demo 點','海報生成（場景6）搭配之後的 Demo C 一起示範效果最好','財務分析（場景8）提醒：強調不是投資建議，是輔助判斷','注意：圖像生成需要 WiFi，確認網路穩定'] },
+  { title:'中場反思暫停', timing:'36:00–41:00（5 分鐘）',
+    points:['重要換氣點，不要跳過','邀請 2–3 位學員分享','如果沒有人主動 → 點名：「你剛才看起來很有反應，能分享一下嗎？」','時間緊張 → 縮短到 3 分鐘，但讓投票保留讓人點'] },
+  { title:'Layer 3 — 需要規劃', timing:'41:00–53:00（12 分鐘）',
+    points:['⭐ NotebookLM（場景9）對講師效益最高，多花時間','強調：「這個工具讓我備課時間省了一半以上」','PDF 審查（場景10）特別適合道場出版委員會','知識庫（場景11）可推薦給前人建立道義問答系統'] },
+  { title:'Layer 4 — 跨工具整合', timing:'53:00–63:00（10 分鐘）',
+    points:['動畫製作流程（場景14）是最讓學員驚艷的場景','強調「整個製作成本幾乎為零」','展開卡片查看四步驟流程圖','如果現場有設計師/創意型學員，這一層特別有共鳴'] },
+  { title:'Layer 5 — 職業級應用', timing:'63:00–71:00（8 分鐘）',
+    points:['先問現場：「有工程相關背景的請舉手」「需要處理大量 Excel 的請舉手」','根據回應決定哪個場景多講','強調「你的職業專業 × AI = 獨特競爭力」','這一層定位是「介紹+引發好奇」，不需現場深入示範'] },
+  { title:'核心洞見', timing:'71:00–75:00（4 分鐘）',
+    points:['等金句動畫跑完再說話（約 5 秒）','三個外帶訊息讓學員自己說出來，不要你念','「就像辦道一樣」那句讓道親有情感共鳴','停頓一下，讓這一刻沉澱'] },
+  { title:'現場示範', timing:'75:00–78:00（3 分鐘）',
+    points:['Demo A（LINE通知）：最快，一定成功，純文字最安全','Demo B（貼文生成）：互動性強，讓學員說主題','Demo C（海報）：視覺效果最好，需要網路穩定','網路不穩 → 選 Demo A'] },
+  { title:'Q&A 與結語', timing:'78:00–80:00+（彈性）',
+    points:['Q&A 卡片點擊展開對應答案','時間充裕，可讓 Q&A 延伸到 85 分鐘','最後說：「今天下課回家，第一件事：試一個 Layer 1 的場景」','感恩結語'] }
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  slide: 0,
+  total: 15,
+  notesOn: false,
+  timerStart: null,
+  timerInterval: null,
+};
+
+/* ============================================================
+   FONT SIZE — iPhone-style A− / A+ (v3)
+   ============================================================ */
+let fsPx = 15;
+const FS_MIN = 12, FS_MAX = 24, FS_STEP = 2;
+
+function changeFontSize(dir) {
+  fsPx = Math.max(FS_MIN, Math.min(FS_MAX, fsPx + dir * FS_STEP));
+  document.documentElement.style.fontSize = fsPx + 'px';
+  document.getElementById('btn-fs-dec').disabled = (fsPx <= FS_MIN);
+  document.getElementById('btn-fs-inc').disabled = (fsPx >= FS_MAX);
+}
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  document.getElementById('btn-theme').textContent = isLight ? '🌙' : '☀️';
+}
+
+/* ============================================================
+   RENDER CARDS
+   ============================================================ */
+function buildCard(s) {
+  const lc = `card-l${s.layer}`;
+  const noteHtml = s.noteText
+    ? `<div class="sc-note ${s.note}">${s.note === 'warn' ? '⚠️' : '💡'} ${s.noteText}</div>` : '';
+  const savingsHtml = s.savings
+    ? `<div class="sc-savings">⏱ ${s.savings}</div>` : '';
+  return `
+    <div class="sc-card ${lc}" onclick="toggleCard(this)">
+      <div class="sc-header">
+        <div class="sc-emoji">${s.emoji}</div>
+        <div class="sc-info">
+          <div class="sc-title-row">
+            <div class="sc-title"${s.titleImg ? ` data-img="${s.titleImg}"` : ''}>${s.title}</div>
+            <button class="demo-badge" data-demo-id="${s.id}" onclick="event.stopPropagation();openDemo('${s.id}')" title="查看 Demo ${s.id} 示範圖片">🎯 Demo ${s.id}</button>
+          </div>
+          <div class="sc-tools">🔧 ${s.tools}</div>
+        </div>
+        <div class="sc-chevron">▼</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-body-inner">
+          <div class="sc-desc">${s.desc}</div>
+          <div class="sc-usage">
+            <div class="sc-usage-lbl">使用方式</div>
+            ${s.usage}
+          </div>
+          ${noteHtml}${savingsHtml}${s.extra || ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function fillCards(layer, id) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = SCENARIOS.filter(s => s.layer === layer).map(buildCard).join('');
+}
+
+function initCards() {
+  fillCards(1,'cards-l1'); fillCards(2,'cards-l2'); fillCards(3,'cards-l3');
+  fillCards(4,'cards-l4'); fillCards(5,'cards-l5');
+}
+
+function toggleCard(card) {
+  if (window.innerWidth < 768) {
+    card.parentElement.querySelectorAll('.sc-card.open').forEach(c => {
+      if (c !== card) c.classList.remove('open');
+    });
+  }
+  card.classList.toggle('open');
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function goToSlide(idx) {
+  if (idx < 0 || idx >= state.total) return;
+  document.querySelectorAll('.slide')[state.slide].classList.remove('active');
+  state.slide = idx;
+  document.querySelectorAll('.slide')[state.slide].classList.add('active');
+  updateProgress(); updateDots(); updateNavBtns();
+  triggerSlideAnim(idx);
+  if (state.notesOn) renderNotes();
+}
+
+const navigateNext = () => goToSlide(state.slide + 1);
+const navigatePrev = () => goToSlide(state.slide - 1);
+
+function updateProgress() {
+  document.getElementById('progress-fill').style.width =
+    ((state.slide + 1) / state.total * 100) + '%';
+}
+function updateDots() {
+  document.querySelectorAll('.dot').forEach((d,i) =>
+    d.classList.toggle('active', i === state.slide));
+  document.getElementById('slide-counter').textContent =
+    `${state.slide + 1} / ${state.total}`;
+}
+function updateNavBtns() {
+  document.getElementById('btn-prev').disabled = state.slide === 0;
+  document.getElementById('btn-next').disabled = state.slide === state.total - 1;
+  document.getElementById('btn-home').hidden = (state.slide === 0);
+}
+function initDots() {
+  const c = document.getElementById('dot-indicators');
+  c.innerHTML = Array.from({length: state.total}, (_,i) =>
+    `<div class="dot${i===0?' active':''}" onclick="goToSlide(${i})" title="投影片 ${i+1}"></div>`
+  ).join('');
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+function triggerSlideAnim(idx) {
+  if (idx === 4) {
+    document.querySelectorAll('.mindset-block').forEach(b => b.classList.remove('vis'));
+    document.querySelectorAll('.mindset-block').forEach(b =>
+      setTimeout(() => b.classList.add('vis'), parseInt(b.dataset.d||0) + 80));
+  }
+  if (idx === 8) {
+    document.querySelectorAll('.reflect-item').forEach(b => b.classList.remove('vis'));
+    document.querySelectorAll('.reflect-item').forEach(b =>
+      setTimeout(() => b.classList.add('vis'), parseInt(b.dataset.d||0) + 80));
+  }
+  if (idx === 12) {
+    const text = 'AI 不會取代你，但會用 AI 的人，會取代不會用的人。';
+    const el = document.getElementById('insight-quote');
+    el.innerHTML = '';
+    [...text].forEach((ch, i) => {
+      const s = document.createElement('span');
+      s.className = 'w'; s.textContent = ch;
+      s.style.animationDelay = (i * 55) + 'ms';
+      el.appendChild(s);
+    });
+  }
+}
+
+/* ============================================================
+   PARTICLES
+   ============================================================ */
+function initParticles() {
+  const c = document.getElementById('particles');
+  if (!c) return;
+  const cols = ['#8BC34A','#4CAF50','#F4B942','#009688'];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const sz = Math.random()*5+3;
+    p.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${cols[i%4]};animation-duration:${Math.random()*14+9}s;animation-delay:${Math.random()*10}s;`;
+    c.appendChild(p);
+  }
+}
+
+/* ============================================================
+   TIMER
+   ============================================================ */
+function timerClick() {
+  if (!state.timerStart) {
+    state.timerStart = Date.now();
+    state.timerInterval = setInterval(updateTimerDisplays, 1000);
+    document.getElementById('timer-widget').classList.add('running');
+  } else {
+    clearInterval(state.timerInterval);
+    state.timerStart = null; state.timerInterval = null;
+    document.getElementById('timer-widget').textContent = '00:00';
+    document.getElementById('timer-widget').classList.remove('running');
+  }
+}
+function updateTimerDisplays() {
+  document.getElementById('timer-widget').textContent = formatTime(Date.now() - state.timerStart);
+}
+function formatTime(ms) {
+  const m = Math.floor(ms/60000), s = Math.floor((ms%60000)/1000);
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+/* ============================================================
+   PRESENTER NOTES
+   ============================================================ */
+function toggleNotes() {
+  state.notesOn = !state.notesOn;
+  document.getElementById('notes-overlay').classList.toggle('vis', state.notesOn);
+  if (state.notesOn) {
+    if (!state.timerStart) timerClick();
+    renderNotes();
+  }
+}
+function renderNotes() {
+  const n = NOTES[state.slide];
+  if (!n) return;
+  document.getElementById('notes-timing').textContent = n.timing;
+  document.getElementById('notes-body').innerHTML = n.points.join(' ｜ ');
+}
+
+/* ============================================================
+   FULLSCREEN
+   ============================================================ */
+function toggleFullscreen() {
+  if (!document.fullscreenElement)
+    document.documentElement.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen().catch(()=>{});
+}
+
+/* ============================================================
+   KEYBOARD & TOUCH
+   ============================================================ */
+/* ============================================================
+   DEMO MODAL (v4 新增)
+   ============================================================ */
+/* 輪播狀態 */
+let _carousel = { images: [], idx: 0 };
+
+const DEMO_EXTS = ['jpg', 'jpeg', 'png', 'mp4'];
+
+function openDemo(id) {
+  const modal   = document.getElementById('demo-modal');
+  const imgEl   = document.getElementById('demo-modal-img');
+  const phEl    = document.getElementById('demo-modal-ph');
+  const phSub   = document.getElementById('demo-modal-ph-sub');
+  const titleEl = document.getElementById('demo-modal-title');
+  const navEl   = document.getElementById('demo-carousel-nav');
+
+  titleEl.textContent = 'Demo ' + id;
+  imgEl.style.display = 'none';
+  imgEl.src = '';
+  phEl.classList.remove('hidden');
+  phSub.textContent = 'Demo/Demo' + id + '.jpg / .jpeg / .png 尚未置入';
+  navEl.classList.remove('vis');
+  _carousel = { images: [], idx: 0 };
+
+  modal.classList.add('vis');
+
+  // 依序嘗試 -0 和 -1 找第一張子圖...
+  findFirstSubImage(id, 0, function(startIdx, firstUrl) {
+    if (firstUrl !== null) {
+      collectSubImages(id, startIdx + 1, [firstUrl], function(found) {
+        _carousel.images = found;
+        _carousel.idx = 0;
+        showCarouselFrame();
+      });
+    } else {
+      tryDemoImage('Demo/Demo' + id, DEMO_EXTS, 0, imgEl, phEl);
+    }
+  });
+}
+
+/* 從序號 n 開始，依序探測 Demo{id}-n，一直直到找不到為止 */
+function collectSubImages(id, n, found, done) {
+  tryOneSrc('Demo/Demo' + id + '-' + n, DEMO_EXTS, 0, function(url) {
+    if (!url) { done(found); return; }
+    found.push(url);
+    collectSubImages(id, n + 1, found, done);
+  });
+}
+
+/* 從 n=0 開始依序嘗試 Demo{id}-n，找到第一張就回傳 (n, url)，否則回傳 (null, null) */
+function findFirstSubImage(id, n, cb) {
+  tryOneSrc('Demo/Demo' + id + '-' + n, DEMO_EXTS, 0, function(url) {
+    if (url) {
+      cb(n, url);
+    } else if (n < 1) {
+      findFirstSubImage(id, n + 1, cb);
+    } else {
+      cb(null, null);
+    }
+  });
+}
+
+/* 對單一 base 嘗試多個副檔名，回傳第一個成功的 URL，否則回傳 null */
+function tryOneSrc(base, exts, idx, cb) {
+  if (idx >= exts.length) { cb(null); return; }
+  const url = base + '.' + exts[idx];
+  if (exts[idx] === 'mp4') {
+    fetch(url, { method: 'HEAD' })
+      .then(r => r.ok ? cb(url) : tryOneSrc(base, exts, idx + 1, cb))
+      .catch(()  => tryOneSrc(base, exts, idx + 1, cb));
+  } else {
+    const probe = new Image();
+    probe.onload  = function() { cb(probe.src); };
+    probe.onerror = function() { tryOneSrc(base, exts, idx + 1, cb); };
+    probe.src = url;
+  }
+}
+
+/* 顯示輪播當前幀 */
+function showCarouselFrame() {
+  const imgEl = document.getElementById('demo-modal-img');
+  const phEl  = document.getElementById('demo-modal-ph');
+  const navEl = document.getElementById('demo-carousel-nav');
+  const imgs  = _carousel.images;
+  const idx   = _carousel.idx;
+
+  resetImgView();
+  const vidEl = document.getElementById('demo-modal-video');
+  const isVideo = imgs[idx].endsWith('.mp4');
+  imgEl.style.display  = isVideo ? 'none' : 'block';
+  vidEl.style.display  = isVideo ? 'block' : 'none';
+  if (isVideo) { vidEl.src = imgs[idx]; vidEl.load(); }
+  else { imgEl.src = imgs[idx]; vidEl.src = ''; }
+  phEl.classList.add('hidden');
+
+  document.getElementById('demo-carousel-counter').textContent = (idx + 1) + ' / ' + imgs.length;
+  document.getElementById('demo-prev').disabled = (idx === 0);
+  document.getElementById('demo-next').disabled = (idx === imgs.length - 1);
+
+  if (imgs.length > 1) navEl.classList.add('vis');
+}
+
+function carouselStep(delta) {
+  const next = _carousel.idx + delta;
+  if (next < 0 || next >= _carousel.images.length) return;
+  _carousel.idx = next;
+  showCarouselFrame();
+}
+
+function probeDemoBadges() {
+  document.querySelectorAll('.demo-badge[data-demo-id]').forEach(btn => {
+    const id = btn.dataset.demoId;
+    tryOneSrc('Demo/Demo' + id + '-0', DEMO_EXTS, 0, function(url) {
+      if (url) { btn.classList.add('has-demo'); return; }
+      tryOneSrc('Demo/Demo' + id + '-1', DEMO_EXTS, 0, function(url2) {
+        if (url2) { btn.classList.add('has-demo'); return; }
+        tryOneSrc('Demo/Demo' + id, DEMO_EXTS, 0, function(url3) {
+          if (url3) btn.classList.add('has-demo');
+        });
+      });
+    });
+  });
+}
+
+function tryDemoImage(base, exts, idx, imgEl, phEl) {
+  if (idx >= exts.length) return; // 全部嘗試完，維持佔位畫面
+  const probe = new Image();
+  probe.onload = function() {
+    imgEl.src = probe.src;
+    imgEl.style.display = 'block';
+    phEl.classList.add('hidden');
+  };
+  probe.onerror = function() {
+    tryDemoImage(base, exts, idx + 1, imgEl, phEl);
+  };
+  probe.src = base + '.' + exts[idx];
+}
+
+/* ============================================================
+   IMAGE ZOOM / PAN
+   ============================================================ */
+let _iv = { scale:1, tx:0, ty:0, drag:false, ox:0, oy:0 };
+
+function _applyIV() {
+  const img = document.getElementById('demo-modal-img');
+  if (img) img.style.transform = `translate(${_iv.tx}px,${_iv.ty}px) scale(${_iv.scale})`;
+}
+
+function resetImgView() {
+  _iv = { scale:1, tx:0, ty:0, drag:false, ox:0, oy:0 };
+  const img = document.getElementById('demo-modal-img');
+  if (img) img.style.transform = '';
+}
+
+function initImgZoomPan() {
+  const body = document.getElementById('demo-modal-body');
+
+  body.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    const f = e.deltaY < 0 ? 1.15 : 1/1.15;
+    const ns = Math.max(0.25, Math.min(10, _iv.scale * f));
+    const r = body.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    _iv.tx = mx - (mx - _iv.tx) * (ns / _iv.scale);
+    _iv.ty = my - (my - _iv.ty) * (ns / _iv.scale);
+    _iv.scale = ns;
+    _applyIV();
+  }, { passive:false });
+
+  body.addEventListener('mousedown', function(e) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    _iv.drag = true;
+    _iv.ox = e.clientX - _iv.tx;
+    _iv.oy = e.clientY - _iv.ty;
+    body.classList.add('dragging');
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!_iv.drag) return;
+    _iv.tx = e.clientX - _iv.ox;
+    _iv.ty = e.clientY - _iv.oy;
+    _applyIV();
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (!_iv.drag) return;
+    _iv.drag = false;
+    document.getElementById('demo-modal-body').classList.remove('dragging');
+  });
+
+  body.addEventListener('dblclick', resetImgView);
+}
+
+function closeDemoModal() {
+  document.getElementById('demo-modal').classList.remove('vis');
+  document.getElementById('demo-modal-img').src = '';
+  const v = document.getElementById('demo-modal-video');
+  v.pause(); v.src = ''; v.style.display = 'none';
+  document.getElementById('demo-carousel-nav').classList.remove('vis');
+  _carousel = { images: [], idx: 0 };
+  resetImgView();
+}
+
+function initKeyboard() {
+  document.addEventListener('keydown', e => {
+    if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+    // 若 Demo modal 開啟，接受 Escape 關閉，以及方向鍵/A/D 切換輪播
+    if (document.getElementById('demo-modal').classList.contains('vis')) {
+      if (e.key === 'Escape' || e.key === 'x' || e.key === 'X') { closeDemoModal(); return; }
+      if (['ArrowLeft','a','A'].includes(e.key))  { e.preventDefault(); carouselStep(-1); return; }
+      if (['ArrowRight','d','D'].includes(e.key)) { e.preventDefault(); carouselStep(1);  return; }
+      return;
+    }
+    switch(e.key) {
+      case 'ArrowRight': case ' ': e.preventDefault(); navigateNext(); break;
+      case 'ArrowLeft':            e.preventDefault(); navigatePrev(); break;
+      case 'a': case 'A':          e.preventDefault(); navigatePrev(); break;
+      case 'd': case 'D':          e.preventDefault(); navigateNext(); break;
+      case 'Escape': closeDemoModal(); break;
+      case 'n': case 'N': toggleNotes(); break;
+      case 'l': case 'L': toggleTheme(); break;
+      case 'f': case 'F': toggleFullscreen(); break;
+      case 'Home': goToSlide(0); break;
+      case 'End':  goToSlide(state.total-1); break;
+      case '1': goToSlide(5);  break;
+      case '2': goToSlide(6);  break;
+      case '3': goToSlide(8);  break;
+      case '4': goToSlide(9);  break;
+      case '5': goToSlide(10); break;
+    }
+  });
+}
+function initTouch() {
+  let sx = 0;
+  const el = document.getElementById('slides-container');
+  el.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+  el.addEventListener('touchend', e => {
+    if (document.getElementById('demo-modal').classList.contains('vis')) return;
+    const dx = sx - e.changedTouches[0].clientX;
+    if (Math.abs(dx) > 50) dx > 0 ? navigateNext() : navigatePrev();
+  }, {passive:true});
+}
+
+function selectDemo(btn) {
+  document.querySelectorAll('.demo-opt').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function initMottoTips() {
+  const tip = document.getElementById('motto-tip');
+  const tipImg = document.getElementById('motto-tip-img');
+  let _timer = null;
+
+  document.querySelectorAll('.layer-motto, .layer-badge[data-img], .section-title[data-img], .sc-title[data-img], .qa-q[data-img]').forEach(el => {
+    el.addEventListener('mouseenter', function(e) {
+      tip.classList.remove('landscape', 'portrait');
+      tipImg.onload = function() {
+        tip.classList.add(tipImg.naturalHeight > tipImg.naturalWidth ? 'portrait' : 'landscape');
+        tip.classList.add('vis');
+      };
+      tipImg.src = el.dataset.img;
+    });
+
+    el.addEventListener('mousemove', function(e) {
+      const r = tip.getBoundingClientRect();
+      const tw = r.width || 800, th = r.height || 200;
+      const x = e.clientX + 16, y = e.clientY + 16;
+      const left = x + tw > window.innerWidth  ? Math.max(0, e.clientX - tw - 8) : x;
+      const top  = y + th > window.innerHeight ? Math.max(0, e.clientY - th - 8) : y;
+      tip.style.left = left + 'px';
+      tip.style.top  = top  + 'px';
+    });
+
+    el.addEventListener('mouseleave', function() {
+      clearTimeout(_timer);
+      tip.classList.remove('vis');
+      tipImg.src = '';
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initCards(); initDots(); initParticles(); initKeyboard(); initTouch(); probeDemoBadges(); initImgZoomPan(); initMottoTips();
+  document.querySelectorAll('.slide')[0].classList.add('active');
+  updateProgress(); updateNavBtns();
+});
+</script>
+</body>
+</html>
